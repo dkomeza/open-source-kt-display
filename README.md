@@ -1,2 +1,2 @@
-# open-source-kt-display
+# Open-Source KT Display
 Open source display firmware for E-Bike KT controllers.
