@@ -15,7 +15,7 @@ Open source display firmware for E-Bike KT controllers. Made for Arduino with co
 
 ## KT Controller communication protocol
 
-Special thank you to user *@obelix662000* at endless-sphere.com for sharing the docs in [This post](https://endless-sphere.com/forums/viewtopic.php?f=2&t=73471). However there seem to be some problems regarding the B6 Checksum calculation (not sure yet). Aparently the formula is not always correct and varies from display to display. I will have to test this myself.
+Special thank you to user *@obelix662000* at endless-sphere.com for sharing the docs in [This post](https://endless-sphere.com/forums/viewtopic.php?f=2&t=73471). However there seem to be some problems regarding the B6 Checksum calculation (not sure yet). Apparently the formula is not always correct and varies from display to display. I will have to test this myself.
 <br><br>
 
 ### Controller to Display
