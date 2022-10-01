@@ -92,19 +92,20 @@ B6: parameters C1 and C2
 b7b6b5b4 b3b2b1b0
 . . c2c1 c0. . .       param C1 (mask 0x38)
 . . . .  . c2c1c0      param C2 (mask 0x07) 
-B7: parameter C5 and C7
+B7: parameter C5 and C14
 b7b6b5b4 b3b2b1b0
 . . . .  c3c2c1c0      param C5 (mask 0x0F)
 . c1c0.  . . . .       param C14 (mask 0x60)
-B8: parameter C4
+B8: parameter C4 and C12
 b7b6b5b4 b3b2b1b0
 c2c1c0.  . . . .       param C4  (mask 0xE0)
-B9: parameter C12
+. . . .  . c2c1c0       param C4  (mask 0x07)
+B9: 20
 b7b6b5b4 b3b2b1b0
-. . . .  c3c2c1c0      param C12  (mask 0x0F)
-B10: parameter C13     
+0 0 0 1  0 1 0 0
+B10: parameter C13 + 1
 b7b6b5b4 b3b2b1b0
-. . . c2 c1c0. .       param C13  (mask 0x1C)
+. . . c2 c1c0 . 1       param C13  (mask 0x1C)
 B11: 50 dec (0x32)
 B12: 14 dec (0x0E)
 parameters C3, C6, C7, C8, C9, C10 not sent to MCU
