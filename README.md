@@ -15,6 +15,7 @@ Open source display firmware for E-Bike KT controllers. Made for Arduino with co
   - [KT Controller communication protocol](#kt-controller-communication-protocol)
     - [Controller to Display](#controller-to-display)
     - [Display to Controller](#display-to-controller)
+      - [Wheel size table](#wheel-size-table)
 
 <br><br>
 
@@ -95,11 +96,11 @@ b7b6b5b4 b3b2b1b0
 B7: parameter C5 and C14
 b7b6b5b4 b3b2b1b0
 . . . .  c3c2c1c0      param C5 (mask 0x0F)
-. c1c0.  . . . .       param C14 (mask 0x60)
+1 c1c0.  . . . .       param C14 (mask 0x60)
 B8: parameter C4 and C12
 b7b6b5b4 b3b2b1b0
 c2c1c0.  . . . .       param C4  (mask 0xE0)
-. . . .  . c2c1c0       param C4  (mask 0x07)
+. . . .  . c2c1c0       param C12  (mask 0x07)
 B9: 20
 b7b6b5b4 b3b2b1b0
 0 0 0 1  0 1 0 0
@@ -112,6 +113,24 @@ parameters C3, C6, C7, C8, C9, C10 not sent to MCU
 
 ```
 
+#### Wheel size table
+```
+29 - 30
+28 - 28
+700C - 24
+26 - 20
+24 - 16
+23 - 12
+20 - 8
+18 - 4
+16 - 0
+14 - 6
+12 - 2
+10 - 14
+08 - 10
+06 - 18
+05 - 22
+```
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
