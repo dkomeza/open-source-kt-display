@@ -2,35 +2,71 @@ import React, { useEffect, useRef, useState } from 'react';
 import './scss/style.scss'
 
 function App() {
-  const [code, setCode] = useState([12,0,149,160,41,102,18,74,4,20,0,50,14])
-  const [binaryCode, setBinaryCode] = useState<Array<String> | null>(null)
-  const refList: any = {0: useRef<HTMLInputElement | null>(null), 1: useRef<HTMLInputElement | null>(null), 2: useRef<HTMLInputElement | null>(null), 3: useRef<HTMLInputElement | null>(null), 4: useRef<HTMLInputElement | null>(null), 5: useRef<HTMLInputElement | null>(null), 6: useRef<HTMLInputElement | null>(null), 7: useRef<HTMLInputElement | null>(null), 8: useRef<HTMLInputElement | null>(null), 9: useRef<HTMLInputElement | null>(null), 10: useRef<HTMLInputElement | null>(null), 11: useRef<HTMLInputElement | null>(null), 12: useRef<HTMLInputElement | null>(null)}
+  const [code, setCode] = useState<number[] | null>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  const [c4check, setC4check] = useState<number>(0)
+  const refList: any = {"speed": useRef<HTMLInputElement | null>(null), "wheel-size": useRef<HTMLInputElement | null>(null), "p1": useRef<HTMLInputElement | null>(null), "p2": useRef<HTMLInputElement | null>(null), "p3": useRef<HTMLInputElement | null>(null), "p4": useRef<HTMLInputElement | null>(null), "p5": useRef<HTMLInputElement | null>(null), "c1": useRef<HTMLInputElement | null>(null), "c2": useRef<HTMLInputElement | null>(null), "c4": useRef<HTMLInputElement | null>(null), "c4-secondary": useRef<HTMLInputElement | null>(null), "c5": useRef<HTMLInputElement | null>(null), "c11": useRef<HTMLInputElement | null>(null), "c12": useRef<HTMLInputElement | null>(null), "c13": useRef<HTMLInputElement | null>(null), "c14": useRef<HTMLInputElement | null>(null)}
 
-  useEffect(() => {
-    let codeTemp = []
-    for (let i = 0; i < code.length; i++) {
-      codeTemp[i] = code[i].toString(2)
-    }
-    setBinaryCode(codeTemp)
-  }, [code])
+  // useEffect(() => {
+  //   let codeTemp = []
+  //   for (let i = 0; i < code.length; i++) {
+  //     codeTemp[i] = code[i].toString(2)
+  //   }
+  // }, [code])
 
   useEffect(() => {
     handleInput()
   }, [])
   
   function handleInput() {
+    setC4check(Number(refList["c4"].current?.value))
+    let b2b4Temp = []
     let tempCode = []
-    for (let i:number = 0; i < code.length ;i++) {
-      tempCode[i] = Number(refList[i].current?.value) || 0
+
+    console.log(Number(refList["speed"].current?.value).toString(2))
+    let speedTemp = Number(refList["speed"].current?.value).toString(2)
+    console.log(speedTemp)
+    let wheelSizeTemp = Number(refList["wheel-size"].current?.value).toString(2)
+    speedTemp = fillZeroes(speedTemp, 8)
+    console.log(speedTemp)
+  
+    for (let i = 0; i < 4; i++) {
+      b2b4Temp[i] = Number(refList["speed"].current?.value).toString(2)[i + 1]
     }
-    let temp = []
-    for (let i = 0; i < code.length; i++) {
-      temp.push(`<span><label htmlFor="b${i}Ref"></label><input id="b${i}Ref" type={"number"} ref={refList[${i}]} defaultValue={${code[i]}}></input></span>`)
+    for (let i = 0; i < 5; i++) {
+      b2b4Temp[i] = Number(refList["wheel-size"].current?.value).toString(2)[i]
     }
-    console.log(temp.join("\n"))
+    b2b4Temp[10] = Number(refList["p1"].current?.value).toString(2)[0]
+    console.log(b2b4Temp)
+
+    tempCode[0] = parseInt(refList["p5"].current?.value || "0")
+    tempCode[1] = 0 // Handled by the display
+    tempCode[2] = 
+    tempCode[3] = Number(refList["p1"].current?.value)
+    tempCode[4] = 0
+    tempCode[5] = 0
+    tempCode[6] = ((Number(refList["c1"].current?.value)) << 3) | Number(refList["c2"].current?.value)
+    tempCode[7] = ((Number(refList["c14"].current?.value)) << 5) | Number(refList["c5"].current?.value) | 128
+    tempCode[8] = ((Number(refList["c4"].current?.value)) << 5) | Number(refList["c12"].current?.value)
+    tempCode[9] = Number(refList["c4-secondary"].current?.value) ? Number(refList["c4-secondary"].current?.value) : 20  
+    tempCode[10] = ((Number(refList["c13"].current?.value)) << 2) | 1
+    tempCode[11] = 50
+    tempCode[12] = 14
+
+    
+    // console.log(Number(refList["c2"].current?.value << 3).toString(2))
+    // for (let i:number = 0; i < code.length ;i++) {
+    //   tempCode[i] = Number(refList[i].current?.value) || 0
+    // }
     setCode(tempCode)
-    console.log(refList[0].current?.value)
+    // console.log(refList["speed"].current?.value)
     // setCode(code => [...code, Number(b12Ref.current?.value)])
+  }
+
+  function fillZeroes(binaryStr: string, length: number) {
+    while(binaryStr.length < length) {
+      binaryStr = "0" + binaryStr;
+    }
+    return binaryStr
   }
 
   return (
@@ -41,30 +77,35 @@ function App() {
       <main>
         <section>
           <form onInput={handleInput}>
-            <span><label htmlFor='speed'>Speed Limit</label><input id='speed' type={"number"} /></span>
-            <span><label htmlFor='wheel-size'>Wheel Size</label><select id='wheel-size'>
-              <option value={"10"}>10"</option>
-              <option value={"12"}>12"</option> 
-              <option value={"14"}>14"</option> 
-              <option value={"16"}>16"</option> 
+            <span><label htmlFor='speed'>Speed Limit</label><input id='speed' type={"number"} defaultValue={72} min={10} max={72} ref={refList["speed"]} /></span>
+            <span><label htmlFor='wheel-size'>Wheel Size</label><select id='wheel-size' ref={refList["wheel-size"]} >
+              <option value={10}>10"</option>
+              <option value={12}>12"</option> 
+              <option value={14}>14"</option> 
+              <option value={16}>16"</option> 
             </select></span>
-            <span><label htmlFor='P1'>P1 Parameter</label><input id='P1' type={"number"} /></span>
-            {/* <span><label htmlFor="b0Ref"></label><input id="b0Ref" type={"number"} ref={refList[0]} defaultValue={12}></input></span>
-            <span><label htmlFor="b1Ref"></label><input id="b1Ref" type={"number"} ref={refList[1]} defaultValue={0}></input></span>
-            <span><label htmlFor="b2Ref"></label><input id="b2Ref" type={"number"} ref={refList[2]} defaultValue={149}></input></span>
-            <span><label htmlFor="b3Ref"></label><input id="b3Ref" type={"number"} ref={refList[3]} defaultValue={160}></input></span>
-            <span><label htmlFor="b4Ref"></label><input id="b4Ref" type={"number"} ref={refList[4]} defaultValue={41}></input></span>
-            <span><label htmlFor="b5Ref"></label><input id="b5Ref" type={"number"} ref={refList[5]} defaultValue={102}></input></span>
-            <span><label htmlFor="b6Ref"></label><input id="b6Ref" type={"number"} ref={refList[6]} defaultValue={18}></input></span>
-            <span><label htmlFor="b7Ref"></label><input id="b7Ref" type={"number"} ref={refList[7]} defaultValue={74}></input></span>
-            <span><label htmlFor="b8Ref"></label><input id="b8Ref" type={"number"} ref={refList[8]} defaultValue={4}></input></span>
-            <span><label htmlFor="b9Ref"></label><input id="b9Ref" type={"number"} ref={refList[9]} defaultValue={20}></input></span>
-            <span><label htmlFor="b10Ref"></label><input id="b10Ref" type={"number"} ref={refList[10]} defaultValue={0}></input></span>
-            <span><label htmlFor="b11Ref"></label><input id="b11Ref" type={"number"} ref={refList[11]} defaultValue={50}></input></span>
-            <span><label htmlFor="b12Ref"></label><input id="b12Ref" type={"number"} ref={refList[12]} defaultValue={14}></input></span> */}
+            <span><label htmlFor='P1'>P1 Parameter</label><input id='P1' type={"number"} defaultValue={86} min={0} max={255} ref={refList["p1"]} /></span>
+            <span><label htmlFor='P2'>P2 Parameter</label><input id='P2' type={"number"} defaultValue={1} min={0} max={6} ref={refList["p2"]} /></span>
+            <span><label htmlFor='P3'>P3 Parameter</label><input id='P3' type={"number"} defaultValue={1} min={0} max={1} ref={refList["p3"]} /></span>
+            <span><label htmlFor='P4'>P4 Parameter</label><input id='P4' type={"number"} defaultValue={0} min={0} max={1} ref={refList["p4"]} /></span>
+            <span><label htmlFor='P5'>P5 Parameter</label><input id='P5' type={"number"} defaultValue={13} min={0} max={64} ref={refList["p5"]} /></span>
+            <span><label htmlFor='C1'>C1 Parameter</label><input id='C1' type={"number"} defaultValue={5} min={0} max={7} ref={refList["c1"]} /></span>
+            <span><label htmlFor='C2'>C2 Parameter</label><input id='C2' type={"number"} defaultValue={0} min={0} max={1} ref={refList["c2"]} /></span>
+            <span><label htmlFor='C4'>C4 Parameter</label><span className='c4-wrapper'><input id='C4' type={"number"} defaultValue={0} min={0} max={4} ref={refList["c4"]} />
+            { c4check === 2 && 
+              <input id='C4-secondary' type={"number"} defaultValue={20} min={10} max={72} ref={refList["c4-secondary"]} />
+            }
+            { c4check === 4 && 
+              <input id='C4-secondary' type={"number"} defaultValue={50} min={20} max={60} ref={refList["c4-secondary"]} />
+            }
+            </span></span>
+            <span><label htmlFor='C5'>C5 Parameter</label><input id='C5' type={"number"} defaultValue={10} min={0} max={10} ref={refList["c5"]} /></span>
+            <span><label htmlFor='C11'>C11 Parameter</label><input id='C11' type={"number"} defaultValue={0} min={0} max={3} ref={refList["c11"]} /></span>
+            <span><label htmlFor='C12'>C12 Parameter</label><input id='C12' type={"number"} defaultValue={4} min={0} max={7} ref={refList["c12"]} /></span>
+            <span><label htmlFor='C13'>C13 Parameter</label><input id='C13' type={"number"} defaultValue={0} min={0} max={5} ref={refList["c13"]} /></span>
+            <span><label htmlFor='C14'>C14 Parameter</label><input id='C14' type={"number"} defaultValue={1} min={1} max={3} ref={refList["c14"]} /></span>
           </form>
-          <div>{ code.join(" ") }</div>
-          <div>{ binaryCode?.join(" ") }</div>
+          <div>{ code?.join(" ") }</div>
         </section>
       </main>
     </div>

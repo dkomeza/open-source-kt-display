@@ -18,14 +18,22 @@ form {
         color: $font-color;
         margin-bottom: 24px;
     }
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
+    .c4-wrapper {
+        display: flex;
+        justify-content: space-between;
+        column-gap: 16px;
+        input{ 
+            margin-bottom: 0;
+        }
     }
+    // input::-webkit-outer-spin-button,
+    // input::-webkit-inner-spin-button {
+    //     -webkit-appearance: none;
+    //     margin: 0;
+    // }
 
-    /* Firefox */
-    input[type=number] {
-        -moz-appearance: textfield;
-    }
+    // /* Firefox */
+    // input[type=number] {
+    //     -moz-appearance: textfield;
+    // }
 }
