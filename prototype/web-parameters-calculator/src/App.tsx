@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './scss/style.scss'
 
 function App() {
@@ -62,7 +62,7 @@ function App() {
     let b4Temp = b2b4Temp.slice(8, 16).join("")
 
     tempCode[0] = parseInt(refList["p5"].current?.value || "0")
-    tempCode[1] = 3 // Handled by the display
+    tempCode[1] = 1 // Handled by the display
     tempCode[2] = parseInt(b2Temp, 2)
     tempCode[3] = Number(refList["p1"].current?.value)
     tempCode[4] = parseInt(b4Temp, 2)
