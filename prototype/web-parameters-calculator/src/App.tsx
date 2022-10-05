@@ -96,10 +96,22 @@ function App() {
           <form onInput={handleInput}>
             <span><label htmlFor='speed'>Speed Limit</label><input id='speed' type={"number"} defaultValue={72} min={10} max={72} ref={refList["speed"]} /></span>
             <span><label htmlFor='wheel-size'>Wheel Size</label><select id='wheel-size' ref={refList["wheel-size"]} >
-              <option value={20}>10"</option>
-              <option value={12}>12"</option> 
-              <option value={14}>14"</option> 
-              <option value={16}>16"</option> 
+              <option value={22}>05"</option>
+              <option value={18}>06"</option>
+              <option value={10}>08"</option>
+              <option value={14}>10"</option>
+              <option value={2}>12"</option>
+              <option value={6}>14"</option>
+              <option value={0}>16"</option>
+              <option value={4}>18"</option>
+              <option value={8}>20"</option>
+              <option value={12}>23"</option>
+              <option value={16}>24"</option>
+              <option selected value={20}>26"</option>
+              <option value={24}>700C</option>
+              <option value={24}>27.5"</option>
+              <option value={28}>28"</option>
+              <option value={30}>29"</option>
             </select></span>
             <span><label htmlFor='P1'>P1 Parameter</label><input id='P1' type={"number"} defaultValue={86} min={0} max={255} ref={refList["p1"]} /></span>
             <span><label htmlFor='P2'>P2 Parameter</label><input id='P2' type={"number"} defaultValue={1} min={0} max={6} ref={refList["p2"]} /></span>
