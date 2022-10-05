@@ -18,6 +18,11 @@ form {
         color: $font-color;
         margin-bottom: 24px;
     }
+    select {
+        option {
+            background-color: $accent-main;
+        }
+    }
     .c4-wrapper {
         display: flex;
         justify-content: space-between;
