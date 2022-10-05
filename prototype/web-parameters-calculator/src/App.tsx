@@ -22,27 +22,41 @@ function App() {
     let b2b4Temp = []
     let tempCode = []
 
-    console.log(Number(refList["speed"].current?.value).toString(2))
-    let speedTemp = Number(refList["speed"].current?.value).toString(2)
-    console.log(speedTemp)
+    let speedTemp = (Number(refList["speed"].current?.value) - 10).toString(2)
     let wheelSizeTemp = Number(refList["wheel-size"].current?.value).toString(2)
-    speedTemp = fillZeroes(speedTemp, 8)
-    console.log(speedTemp)
-  
-    for (let i = 0; i < 4; i++) {
-      b2b4Temp[i] = Number(refList["speed"].current?.value).toString(2)[i + 1]
-    }
+    let p2Temp = Number(refList["p2"].current?.value)
+    let p3Temp = (Number(refList["p3"].current?.value))
+    let p4Temp = (Number(refList["p4"].current?.value))
+    let pTemps = (p2Temp | (p3Temp << 3) | (p4Temp << 4)).toString(2)
+
+    
+
+    speedTemp = fillZeroes(speedTemp, 6)
+    wheelSizeTemp = fillZeroes(wheelSizeTemp, 5)
+    pTemps = fillZeroes(pTemps, 5)
+
     for (let i = 0; i < 5; i++) {
-      b2b4Temp[i] = Number(refList["wheel-size"].current?.value).toString(2)[i]
+      b2b4Temp.push(speedTemp[i + 1])
     }
-    b2b4Temp[10] = Number(refList["p1"].current?.value).toString(2)[0]
+    console.log(speedTemp)
     console.log(b2b4Temp)
+    for (let i = 0; i < 5; i++) {
+      b2b4Temp.push(wheelSizeTemp[i])
+    }
+    b2b4Temp[10] = speedTemp[0]
+    b2b4Temp[11] = pTemps[0]
+    b2b4Temp[12] = pTemps[1]
+    b2b4Temp[13] = pTemps[2]
+    b2b4Temp[14] = pTemps[3]
+    b2b4Temp[15] = pTemps[4]
+    let b2Temp = b2b4Temp.slice(0, 8).join("")
+    let b4Temp = b2b4Temp.slice(8, 16).join("")
 
     tempCode[0] = parseInt(refList["p5"].current?.value || "0")
-    tempCode[1] = 0 // Handled by the display
-    tempCode[2] = 
+    tempCode[1] = 3 // Handled by the display
+    tempCode[2] = parseInt(b2Temp, 2)
     tempCode[3] = Number(refList["p1"].current?.value)
-    tempCode[4] = 0
+    tempCode[4] = parseInt(b4Temp, 2)
     tempCode[5] = 0
     tempCode[6] = ((Number(refList["c1"].current?.value)) << 3) | Number(refList["c2"].current?.value)
     tempCode[7] = ((Number(refList["c14"].current?.value)) << 5) | Number(refList["c5"].current?.value) | 128
@@ -52,14 +66,17 @@ function App() {
     tempCode[11] = 50
     tempCode[12] = 14
 
+    let crcTemp = 0
+
+    for (let i = 0; i < tempCode.length; i++) {
+      if (i !== 5) {
+        crcTemp ^= tempCode[i]
+      }
+    }
+    crcTemp ^= 3
     
-    // console.log(Number(refList["c2"].current?.value << 3).toString(2))
-    // for (let i:number = 0; i < code.length ;i++) {
-    //   tempCode[i] = Number(refList[i].current?.value) || 0
-    // }
+    tempCode[5] = crcTemp
     setCode(tempCode)
-    // console.log(refList["speed"].current?.value)
-    // setCode(code => [...code, Number(b12Ref.current?.value)])
   }
 
   function fillZeroes(binaryStr: string, length: number) {
@@ -79,7 +96,7 @@ function App() {
           <form onInput={handleInput}>
             <span><label htmlFor='speed'>Speed Limit</label><input id='speed' type={"number"} defaultValue={72} min={10} max={72} ref={refList["speed"]} /></span>
             <span><label htmlFor='wheel-size'>Wheel Size</label><select id='wheel-size' ref={refList["wheel-size"]} >
-              <option value={10}>10"</option>
+              <option value={20}>10"</option>
               <option value={12}>12"</option> 
               <option value={14}>14"</option> 
               <option value={16}>16"</option> 
