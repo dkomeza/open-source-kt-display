@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { MouseEventHandler, useEffect, useRef, useState } from 'react';
 import './scss/style.scss'
 
 function App() {
   const [code, setCode] = useState<number[] | null>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   const [c4check, setC4check] = useState<number>(0)
+  const [copied, setCopied] = useState(false)
   const refList: any = {"speed": useRef<HTMLInputElement | null>(null), "wheel-size": useRef<HTMLInputElement | null>(null), "p1": useRef<HTMLInputElement | null>(null), "p2": useRef<HTMLInputElement | null>(null), "p3": useRef<HTMLInputElement | null>(null), "p4": useRef<HTMLInputElement | null>(null), "p5": useRef<HTMLInputElement | null>(null), "c1": useRef<HTMLInputElement | null>(null), "c2": useRef<HTMLInputElement | null>(null), "c4": useRef<HTMLInputElement | null>(null), "c4-secondary": useRef<HTMLInputElement | null>(null), "c5": useRef<HTMLInputElement | null>(null), "c11": useRef<HTMLInputElement | null>(null), "c12": useRef<HTMLInputElement | null>(null), "c13": useRef<HTMLInputElement | null>(null), "c14": useRef<HTMLInputElement | null>(null)}
 
   // useEffect(() => {
@@ -16,6 +17,14 @@ function App() {
   useEffect(() => {
     handleInput()
   }, [])
+
+  function copyCode(e: any) {
+    navigator.clipboard.writeText(e.target.innerText);
+    setCopied(true);
+    window.setTimeout(() => {
+      setCopied(false);
+    }, 2000)
+  }
   
   function handleInput() {
     setC4check(Number(refList["c4"].current?.value))
@@ -95,7 +104,7 @@ function App() {
         <section>
           <form onInput={handleInput}>
             <span><label htmlFor='speed'>Speed Limit</label><input id='speed' type={"number"} defaultValue={72} min={10} max={72} ref={refList["speed"]} /></span>
-            <span><label htmlFor='wheel-size'>Wheel Size</label><select id='wheel-size' ref={refList["wheel-size"]} >
+            <span><label htmlFor='wheel-size'>Wheel Size</label><select id='wheel-size' ref={refList["wheel-size"]} defaultValue={20} >
               <option value={22}>05"</option>
               <option value={18}>06"</option>
               <option value={10}>08"</option>
@@ -107,7 +116,7 @@ function App() {
               <option value={8}>20"</option>
               <option value={12}>23"</option>
               <option value={16}>24"</option>
-              <option selected value={20}>26"</option>
+              <option value={20}>26"</option>
               <option value={24}>700C</option>
               <option value={24}>27.5"</option>
               <option value={28}>28"</option>
@@ -134,7 +143,12 @@ function App() {
             <span><label htmlFor='C13'>C13 Parameter</label><input id='C13' type={"number"} defaultValue={0} min={0} max={5} ref={refList["c13"]} /></span>
             <span><label htmlFor='C14'>C14 Parameter</label><input id='C14' type={"number"} defaultValue={1} min={1} max={3} ref={refList["c14"]} /></span>
           </form>
-          <div>{ code?.join(" ") }</div>
+          <div className='code' onClick={(e) => copyCode(e)}>{ code?.join(", ") }
+          
+          </div>
+          {copied && 
+            <span className='copied'>Code copied to clipboard</span>
+          }
         </section>
       </main>
     </div>

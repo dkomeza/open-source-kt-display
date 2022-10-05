@@ -42,3 +42,27 @@ form {
     //     -moz-appearance: textfield;
     // }
 }
+
+.code {
+    margin: 0 auto;
+    width: max-content;
+    padding: 24px 32px;
+    background: linear-gradient(0deg, $accent-main, $accent-secondary);
+    border: none;
+    outline: none;
+    border-radius: 32px;
+    color: $font-color;
+    cursor: pointer;
+}
+
+.copied {
+    margin: 8px auto;
+    display: block ;
+    width: max-content;
+    background: linear-gradient(0deg, $accent-main, $accent-secondary);
+    padding: 8px 16px;
+    border: none;
+    outline: none;
+    border-radius: 32px;
+    color: $font-color;
+}
