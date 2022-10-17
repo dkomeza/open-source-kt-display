@@ -159,7 +159,7 @@ int calculateCRC(byte buf_up[]) {
 }
 
 void processPacket(byte buf[]) {
-  if (buf[3] * buf[4] <= 0) {
+  if (buf[3] + buf[4] <= 0) {
     speed = 0;
   }
   else {
