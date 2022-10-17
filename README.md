@@ -32,11 +32,11 @@ Packet consist of 12 bytes. 9600 baud, 8-n-1, byte-by-byte, no separators
 
 B0	B1	B2	B3	B4	B5	B6	B7	B8	B9	B10	B11
 
-(e.g: 65 16 48 0 139 0 164 2 13 0 0 0)
+(e.g: 65 16 0 0 139 0 164 2 13 0 0 0)
 
 B0: 65 dec (0x41)
 B1: battery level: 0: empty box, 1: border flashing, 2: animated charging, 3: empty, 4: 1 bar, 8: 2 bars, 16: 4 bars (full),
-B2: 48 dec (0x30)
+B2: 0 dec (0x00)
 B3,B4: speed, wheel rotation period, ms; period(ms)=B3*256+B4;
 B5 error info display: 0x20: "0info", 0x21: "6info", 0x22: "1info", 0x23: "2info", 0x24: "3info", 0x25: "0info", 0x26: "4info", 0x28: "0info"
 B6: CRC: xor B0,B1,B2,B3,B4,B5,B7,B8,B9,B10,B11
@@ -45,6 +45,7 @@ b7b6b5b4 b3b2b1b0
 . . . .  . . . m0      if set animated circle "throttle"
 . . . .  m0 . . .      if set "C" (cruise) is shown
 . . . m0  . . . .      if set "assist" shown
+. . m0 .  . . . .      if brake icon shown
 B8: power in 13 wt increments (48V version of the controller)
 B9: motor temperature, can be negative or positive,T(C)=(int8)B8+15,
     if temperature > 120C LCD screen is flashing.
