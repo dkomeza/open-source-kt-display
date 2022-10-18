@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <HardwareSerial.h>
+#include <EEPROM.h>
 
 
 // thermistor defines
@@ -9,6 +10,9 @@
 #define B 3950
 #define VCC 5
 #define R 10000
+
+// EEPROM defines
+#define EEPROM_SIZE 2
 
 // initialize buttons
 OneButton buttonUp(22, true);
@@ -69,6 +73,9 @@ void setup() {
   tft.setRotation(6);
   initialRender();
 
+  // initialize eeprom
+  EEPROM.begin(EEPROM_SIZE);
+
   // save initial max speed from pregenerated packet
   initialMaxSpeedB2 = buf_up[2] & 248;
   initialMaxSpeedB4 = buf_up[4] & 32;
@@ -87,6 +94,13 @@ void setup() {
 
   // turn on display backlight
   digitalWrite(5, HIGH);
+
+  // get data from eeprom
+  limitState = EEPROM.read(0);
+  currentGear = EEPROM.read(1);
+
+  // set initial "legal mode" max gear and speed
+  toggleLimit();
 }
 
 void loop() {
@@ -129,11 +143,13 @@ void loop() {
 void increaseGear() {
   if (currentGear < maxGear) {
     currentGear++;
+    EEPROM.write(1, currentGear);
   }
 } 
 void decreaseGear(){       
   if (currentGear > 0) {
     currentGear--;
+    EEPROM.write(1, currentGear);
   }
 }
 void walkMode() {
@@ -144,19 +160,18 @@ void stopWalkMode() {
   currentGear = previousGearWalk;
 }
 void toggleLimit() {
+  buf_up[2] = buf_up[2] & 7;
+  buf_up[4] = buf_up[4] & 223;
   if (limitState) {
-    buf_up[2] = buf_up[2] & 7;
-    buf_up[4] = buf_up[4] & 223;
     buf_up[2] = buf_up[2] | initialMaxSpeedB2;
     buf_up[4] = buf_up[4] | initialMaxSpeedB4;
     gearColor = 0;
     updateGear(true, gearColor);
     maxGear = 5;
     limitState = 0;
+    
   }
   else {
-    buf_up[2] = buf_up[2] & 7;
-    buf_up[4] = buf_up[4] & 223;
     buf_up[2] = buf_up[2] | ((15 & 31) * 8 );
     buf_up[4] = buf_up[4] | (15 & 32);
     gearColor = 1;
@@ -167,6 +182,7 @@ void toggleLimit() {
     maxGear = 2;
     limitState = 1;
   }
+  EEPROM.write(0, limitState);
 }
 
 // group of functions for dealing with the data
