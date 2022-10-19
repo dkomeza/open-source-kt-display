@@ -100,7 +100,7 @@ void setup() {
   currentGear = EEPROM.read(1);
 
   // set initial "legal mode" max gear and speed
-  toggleLimit();
+  handleLimit();
 }
 
 void loop() {
@@ -160,29 +160,14 @@ void stopWalkMode() {
   currentGear = previousGearWalk;
 }
 void toggleLimit() {
-  buf_up[2] = buf_up[2] & 7;
-  buf_up[4] = buf_up[4] & 223;
   if (limitState) {
-    buf_up[2] = buf_up[2] | initialMaxSpeedB2;
-    buf_up[4] = buf_up[4] | initialMaxSpeedB4;
-    gearColor = 0;
-    updateGear(true, gearColor);
-    maxGear = 5;
     limitState = 0;
-    
   }
   else {
-    buf_up[2] = buf_up[2] | ((15 & 31) * 8 );
-    buf_up[4] = buf_up[4] | (15 & 32);
-    gearColor = 1;
-    updateGear(true, gearColor);
-    if (currentGear > 2) {
-      currentGear = 2;
-    }
-    maxGear = 2;
     limitState = 1;
   }
   EEPROM.write(0, limitState);
+  handleLimit();
 }
 
 // group of functions for dealing with the data
@@ -273,6 +258,28 @@ bool shiftArray(int counter) {
       memcpy(buf, newBuf, BUFFER_SIZE);
       return true;
     }
+  }
+}
+// function to handle "legal mode"
+void handleLimit() {
+  buf_up[2] = buf_up[2] & 7;
+  buf_up[4] = buf_up[4] & 223;
+  if (limitState) {
+    buf_up[2] = buf_up[2] | ((15 & 31) * 8 );
+    buf_up[4] = buf_up[4] | (15 & 32);
+    gearColor = 1;
+    updateGear(true, gearColor);
+    if (currentGear > 2) {
+      currentGear = 2;
+    }
+    maxGear = 2;
+  }
+  else {
+    buf_up[2] = buf_up[2] | initialMaxSpeedB2;
+    buf_up[4] = buf_up[4] | initialMaxSpeedB4;
+    gearColor = 0;
+    updateGear(true, gearColor);
+    maxGear = 5;
   }
 }
 
