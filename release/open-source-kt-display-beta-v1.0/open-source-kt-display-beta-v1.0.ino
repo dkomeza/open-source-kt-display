@@ -214,7 +214,7 @@ void processPacket(byte buf[]) {
 // getting controller temperature
 void getControllerTemperature() {
   float sum = 0;
-  for (int i=0; i < samples; i++) {
+  for (int i=0; i < thermistorSamples; i++) {
     VRT = (VCC / 1023.00) * analogRead(27);
     VR = VCC - VRT;
     RT = VRT / (VR / R);               //Resistance of RT
@@ -225,11 +225,11 @@ void getControllerTemperature() {
     tx = tx - 273.15;                 //Conversion to Celsius
     sum += TX;
   }
-  controllerTemp = sum / samples;
+  controllerTemp = sum / thermistorSamples;
 }
 // function for shifting the packet in case of a bit loss
 bool shiftArray(int counter) {
-  int crc = calculateXOR();
+  int crc = calculateDownCRC();
   if (counter = 5) {
     return false;
   }
@@ -292,7 +292,6 @@ void handleDisplay(bool force) {
   updateEngineTemp(force);
   updateControllerTemp();
   updatePower();
-  updateTime();
   updateGear(force, gearColor);
   updateSpeed();
 }
