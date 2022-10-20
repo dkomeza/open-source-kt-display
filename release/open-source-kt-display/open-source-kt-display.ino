@@ -321,7 +321,7 @@ void updateBattery(int bars, bool force) {
 }
 // drawing the current speed
 void updateSpeed() {
-  if (speed < 100) { // make sure the speed is always 3 digits
+  if (speed < 1000) { // make sure the speed is always 3 digits or less
     tft.setTextColor(TFT_WHITE, 0);
     tft.setCursor(40, 86);
     tft.setTextFont(8);
