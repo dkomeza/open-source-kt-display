@@ -12,7 +12,7 @@
 
 // EEPROM defines
 #define EEPROM_SIZE 512
-
+ 
 // initialize buttons
 OneButton buttonUp(22, true);
 OneButton buttonDown(21, true);
@@ -209,7 +209,7 @@ void processPacket(byte buf[]) {
     }
 
     power = buf[8] * 13;
-    engineTemp = uint8_t(buf[9]) + 15;
+    engineTemp = int8_t(buf[9]) + 15;
 }
 // getting controller temperature
 void getControllerTemperature() {
