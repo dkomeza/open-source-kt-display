@@ -44,6 +44,7 @@ int previousBatteryLevel = -1;
 int previousEngineTemp = -1;
 int previousControllerTemp = -1;
 int previousGear = -1;
+int previousColor = -1;
 
 // initialize variables for "legal mode"
 int previousGearWalk = 0;
@@ -52,7 +53,7 @@ int initialMaxSpeedB2 = 0;
 int initialMaxSpeedB4 = 0;
 int limitState = 0;
 
-// gear color - 0: yellow (normal), 1: green ("legal mode"), 2: red (breaking)
+// gear color - 0: yellow (normal), 1: green ("legal mode"), 2: red (braking)
 int gearColor = 0;
 
 // debug variables
@@ -211,9 +212,13 @@ void processPacket(byte buf[]) {
     } else {
         batteryLevel = buf[1];
     }
-
     power = buf[8] * 13;
     engineTemp = int8_t(buf[9]) + 15;
+    if (buf[7] == 32) {
+        gearColor = 2;
+    } else {
+        gearColor = limitState ? 0 : 1;
+    }
 }
 // getting controller temperature
 void getControllerTemperature() {
@@ -270,7 +275,7 @@ void handleLimit() {
     if (limitState) {
         buf_up[2] = buf_up[2] | ((15 & 31) * 8);
         buf_up[4] = buf_up[4] | (15 & 32);
-        gearColor = 1;
+        gearColor = 0;
         updateGear(true, gearColor);
         if (currentGear > 2) {
             currentGear = 2;
@@ -279,7 +284,7 @@ void handleLimit() {
     } else {
         buf_up[2] = buf_up[2] | initialMaxSpeedB2;
         buf_up[4] = buf_up[4] | initialMaxSpeedB4;
-        gearColor = 0;
+        gearColor = 1;
         updateGear(true, gearColor);
         maxGear = 5;
     }
@@ -348,17 +353,20 @@ void updateSpeed() {
 }
 // drawing the current gear
 void updateGear(bool force, int color) {
-    if (previousGear != currentGear || force) {
+    if (previousGear != currentGear || force || previousColor != color) {
         tft.setTextFont(7);
         tft.setTextSize(1);
-        if (color == 1) {
+        if (color == 0) {
             tft.setTextColor(TFT_GREEN, 0);
-        } else {
+        } else if (color == 1) {
             tft.setTextColor(TFT_YELLOW, 0);
+        } else {
+            tft.setTextColor(TFT_RED, 0);
         }
         tft.setCursor(108, 180);
         tft.print(currentGear);
         previousGear = currentGear;
+        previousColor = color;
     }
 }
 // drawing the current engine temperature
