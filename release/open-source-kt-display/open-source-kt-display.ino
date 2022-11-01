@@ -44,6 +44,7 @@ int previousBatteryLevel = -1;
 int previousEngineTemp = -1;
 int previousControllerTemp = -1;
 int previousGear = -1;
+int previousColor = -1;
 
 // initialize variables for "legal mode"
 int previousGearWalk = 0;
@@ -216,7 +217,7 @@ void processPacket(byte buf[]) {
     if (buf[7] == 32) {
         gearColor = 2;
     } else {
-        gearColor = limitState ? 1 : 0;
+        gearColor = limitState ? 0 : 1;
     }
 }
 // getting controller temperature
@@ -352,7 +353,7 @@ void updateSpeed() {
 }
 // drawing the current gear
 void updateGear(bool force, int color) {
-    if (previousGear != currentGear || force) {
+    if (previousGear != currentGear || force || previousColor != color) {
         tft.setTextFont(7);
         tft.setTextSize(1);
         if (color == 0) {
@@ -365,6 +366,7 @@ void updateGear(bool force, int color) {
         tft.setCursor(108, 180);
         tft.print(currentGear);
         previousGear = currentGear;
+        previousColor = color;
     }
 }
 // drawing the current engine temperature
