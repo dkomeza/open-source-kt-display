@@ -369,15 +369,18 @@ void updateEngineTemp(bool force) {
         tft.setTextColor(TFT_WHITE, 0);
         tft.print("MTP:");
         tft.setTextColor(TFT_YELLOW, 0);
-        if (engineTemp < 10) {
-            tft.print("  ");
-            tft.print(engineTemp);
-        } else if (engineTemp < 100) {
+        if (engineTemp < -10) {
             tft.print(" ");
-            tft.print(engineTemp);
+        } else if (engineTemp < 0) {
+            tft.print("  ");
+        } else if (engineTemp < 10) {
+            tft.print("   ");
+        } else if (engineTemp < 100) {
+            tft.print("  ");
         } else {
-            tft.print(engineTemp);
+            tft.print(" ");
         }
+        tft.print(engineTemp);
         tft.print("C");
         previousEngineTemp = engineTemp;
     }
