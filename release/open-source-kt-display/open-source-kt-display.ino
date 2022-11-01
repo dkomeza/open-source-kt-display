@@ -12,7 +12,7 @@
 
 // EEPROM defines
 #define EEPROM_SIZE 512
- 
+
 // initialize buttons
 OneButton buttonUp(22, true);
 OneButton buttonDown(21, true);
@@ -110,25 +110,6 @@ void loop() {
     if (SerialAvailableBits >= BUFFER_SIZE) {    // check if there are enough available bytes to read
         SerialPort.readBytes(buf, BUFFER_SIZE);  // read bytes to the buf array
         // update variables (current gear and crc)
-        buf_up[1] = currentGear;
-        buf_up[5] = calculateUpCRC();
-
-        SerialPort.write(buf_up, BUFFER_SIZE_UP);  // send packet to the controller
-
-        bool validPacket = shiftArray(0);
-
-        processPacket(buf);          // process packet from the controller
-        getControllerTemperature();  // get controller temperature
-        if (testing) {               // render testing screen displaying the raw packet
-            handleTestingDisplay();
-        } else {
-            if (validPacket) {         // if the packet is valid render the display, otherwise skip the render
-                handleDisplay(false);  // render normal display without force update
-                if (millis() - time < 30) {
-                    delay(30 - (millis() - time));  // delay to make the loop run at a constant rate
-                }
-            }
-        }
     } else {
         if (counter > 50) {
             SerialPort.begin(9600, SERIAL_8N1, 16, 17);
@@ -136,11 +117,34 @@ void loop() {
         }
         counter++;
     }
+    bool validPacket = shiftArray(0);
+
+    processPacket(buf);          // process packet from the controller
+    getControllerTemperature();  // get controller temperature
+    if (testing) {               // render testing screen displaying the raw packet
+        handleTestingDisplay();
+    } else {
+        if (validPacket) {         // if the packet is valid render the display, otherwise skip the render
+            handleDisplay(false);  // render normal display without force update
+        }
+        if (millis() - time < 50) {
+            delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
+        }
+    }
+    updateGear(false, gearColor);
+
+    buf_up[1] = currentGear;
+    buf_up[5] = calculateUpCRC();
+
+    SerialPort.write(buf_up, BUFFER_SIZE_UP);  // send packet to the controller
 
     // update buttons
     buttonUp.tick();
     buttonDown.tick();
     buttonPower.tick();
+
+    Serial.print("Time: ");
+    Serial.println(millis() - time);
 }
 
 // group of functions for dealing with buttons
@@ -289,7 +293,6 @@ void handleDisplay(bool force) {
     updateEngineTemp(force);
     updateControllerTemp();
     updatePower();
-    updateGear(force, gearColor);
     updateSpeed();
 }
 // drawing the empty screen with lines and a battery outline
