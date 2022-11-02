@@ -214,7 +214,7 @@ void processPacket(byte buf[]) {
     }
     power = buf[8] * 13;
     engineTemp = int8_t(buf[9]) + 15;
-    if (buf[7] == 32) {
+    if ((buf[7] && 32) == 32) {
         gearColor = 2;
     } else {
         gearColor = limitState ? 0 : 1;
