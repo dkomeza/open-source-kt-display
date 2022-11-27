@@ -24,15 +24,17 @@ int previousCursorPosition[2] = {0, 0};
 
 String NAMES[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14"};
 int VALUES[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
-int MIN_VALUES[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-int MAX_VALUES[MENU_SIZE] = {72, 14, 14, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
-
+const int MIN_VALUES[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+const int MAX_VALUES[MENU_SIZE] = {72, 14, 14, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
 const int WHEEL_SIZE_TABLE[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
+
+int speedLimit = VALUES[0];
 
 // initialize byte arrays for serial communication
 const int BUFFER_SIZE = 12;
 const int BUFFER_SIZE_UP = 13;
 
+byte SETTINGS[BUFFER_SIZE_UP];
 byte buf_up[BUFFER_SIZE_UP];
 
 bool settingsMenu = false;
@@ -55,6 +57,10 @@ void setup() {
   buttonDown.attachLongPressStop(handleDownButtonLongPressStop);
   buttonPower.attachClick(handlePowerButtonClick);
   buttonPower.attachLongPressStart(handlePowerButtonLongPressStart);
+
+  getDataFromEEPROM();
+  calculatePacket();
+  saveToLocal();
 
   // setup serial ports
   Serial.begin(9600);
@@ -124,6 +130,8 @@ void handlePowerButtonLongPressStart() {
       initialRender();
       settingsMenu = !settingsMenu;
       cursorPositionCounter = 0;
+      saveDataToEEPROM();
+      saveToLocal();
     }
   }
 }
@@ -294,20 +302,20 @@ void handleChange(int position, String direction) {
 }
 
 void calculatePacket() {
-  buf_up[0] = VALUES[6];
-  buf_up[1] = 0;
-  buf_up[2] = (((VALUES[0] - 10) & 31) << 3) | (WHEEL_SIZE_TABLE[VALUES[1]][1] >> 2);
-  buf_up[3] = VALUES[2];
-  buf_up[4] = ((WHEEL_SIZE_TABLE[VALUES[1]][1] & 3) << 6) | ((VALUES[0] - 10) & 32) | (VALUES[5] << 4) | VALUES[4] << 3 | VALUES[3];
-  buf_up[5] = 0;
-  buf_up[6] = (VALUES[7] << 3) | VALUES[8];
-  buf_up[7] = (VALUES[14] << 5) | VALUES[10] | 128;
-  buf_up[8] = (VALUES[9] << 5) | VALUES[12];
-  buf_up[9] = 20;
-  buf_up[10] = VALUES[13] << 2 | 1;
-  buf_up[11] = 50;
-  buf_up[12] = 14;
-  buf_up[5] = calculateUpCRC();
+  SETTINGS[0] = VALUES[6];
+  SETTINGS[1] = 0;
+  SETTINGS[2] = (((speedLimit - 10) & 31) << 3) | (WHEEL_SIZE_TABLE[VALUES[1]][1] >> 2);
+  SETTINGS[3] = VALUES[2];
+  SETTINGS[4] = ((WHEEL_SIZE_TABLE[VALUES[1]][1] & 3) << 6) | ((speedLimit - 10) & 32) | (VALUES[5] << 4) | VALUES[4] << 3 | VALUES[3];
+  SETTINGS[5] = 0;
+  SETTINGS[6] = (VALUES[7] << 3) | VALUES[8];
+  SETTINGS[7] = (VALUES[14] << 5) | VALUES[10] | 128;
+  SETTINGS[8] = (VALUES[9] << 5) | VALUES[12];
+  SETTINGS[9] = 20;
+  SETTINGS[10] = VALUES[13] << 2 | 1;
+  SETTINGS[11] = 50;
+  SETTINGS[12] = 14;
+  SETTINGS[5] = calculateUpCRC();
 }
 
 void drawPacket() {
@@ -322,9 +330,28 @@ int calculateUpCRC() {
   int crc = 0;
   for (int i = 0; i < BUFFER_SIZE_UP; i++) {
     if (i != 5) {
-      crc ^= buf_up[i];
+      crc ^= SETTINGS[i];
     }
   }
   crc ^= 3;
   return crc;
+}
+
+void getDataFromEEPROM() {
+  for (int i = 0; i < 15; i++) {
+    VALUES[i] = EEPROM.read(i);
+  }
+}
+
+void saveDataToEEPROM() {
+  for (int i = 0; i < 15; i++) {
+    EEPROM.write(i, VALUES[i]);
+  }
+  EEPROM.commit();
+}
+
+void saveToLocal() {
+  for (int i = 0; i < 15; i++) {
+    buf_up[i] = SETTINGS[i];
+  }
 }
