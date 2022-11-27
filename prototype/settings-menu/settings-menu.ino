@@ -29,6 +29,12 @@ int MAX_VALUES[MENU_SIZE] = {72, 14, 14, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
 
 const int WHEEL_SIZE_TABLE[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
 
+// initialize byte arrays for serial communication
+const int BUFFER_SIZE = 12;
+const int BUFFER_SIZE_UP = 13;
+
+byte buf_up[BUFFER_SIZE_UP];
+
 bool settingsMenu = false;
 bool selectedOption = false;
 
@@ -168,11 +174,17 @@ void renderSettingsMenu() {
     } else {
       tft.print(VALUES[i]);
     }
-    tft.drawFastHLine(0, 261, 240, TFT_WHITE);
-    tft.drawFastHLine(0, 262, 240, TFT_WHITE);
-    tft.drawFastHLine(0, 263, 240, TFT_WHITE);
   }
+  tft.drawFastHLine(0, 261, 240, TFT_WHITE);
+  tft.drawFastHLine(0, 262, 240, TFT_WHITE);
+  tft.drawFastHLine(0, 263, 240, TFT_WHITE);
+  tft.setCursor(8, 266);
+  tft.setTextFont(4);
+  tft.print("Packet");
+  tft.setTextFont(2);
   calculateCursorPosition();
+  calculatePacket();
+  drawPacket();
   updateCursor(true);
 }
 
@@ -243,6 +255,8 @@ void deselectOption(int position) {
   } else {
     tft.print(VALUES[position]);
   }
+  calculatePacket();
+  drawPacket();
 }
 
 void handleChange(int position, String direction) {
@@ -277,4 +291,40 @@ void handleChange(int position, String direction) {
     tft.print(VALUES[position]);
   }
   tft.setTextColor(TFT_WHITE, 0);
+}
+
+void calculatePacket() {
+  buf_up[0] = VALUES[6];
+  buf_up[1] = 0;
+  buf_up[2] = (((VALUES[0] - 10) & 31) << 3) | (WHEEL_SIZE_TABLE[VALUES[1]][1] >> 2);
+  buf_up[3] = VALUES[2];
+  buf_up[4] = ((WHEEL_SIZE_TABLE[VALUES[1]][1] & 3) << 6) | ((VALUES[0] - 10) & 32) | (VALUES[5] << 4) | VALUES[4] << 3 | VALUES[3];
+  buf_up[5] = 0;
+  buf_up[6] = (VALUES[7] << 3) | VALUES[8];
+  buf_up[7] = (VALUES[14] << 5) | VALUES[10] | 128;
+  buf_up[8] = (VALUES[9] << 5) | VALUES[12];
+  buf_up[9] = 20;
+  buf_up[10] = VALUES[13] << 2 | 1;
+  buf_up[11] = 50;
+  buf_up[12] = 14;
+  buf_up[5] = calculateUpCRC();
+}
+
+void drawPacket() {
+  tft.setCursor(8, 280);
+  for (int i = 0; i < BUFFER_SIZE_UP; i++) {
+    tft.print(buf_up[i]);
+    tft.print(", ");
+  }
+}
+
+int calculateUpCRC() {
+  int crc = 0;
+  for (int i = 0; i < BUFFER_SIZE_UP; i++) {
+    if (i != 5) {
+      crc ^= buf_up[i];
+    }
+  }
+  crc ^= 3;
+  return crc;
 }
