@@ -31,184 +31,184 @@ bool settingsMenu = false;
 bool selectedOption = false;
 
 void setup() {
-    // setup display
-    tft.init();
-    tft.setRotation(6);
-    initialRender();
+  // setup display
+  tft.init();
+  tft.setRotation(6);
+  initialRender();
 
-    // initialize eeprom
-    EEPROM.begin(EEPROM_SIZE);
+  // initialize eeprom
+  EEPROM.begin(EEPROM_SIZE);
 
-    // attach button functions
-    buttonUp.attachClick(handleUpButtonClick);
-    buttonUp.attachLongPressStart(handleUpButtonLongPressStart);
-    buttonDown.attachClick(handleDownButtonClick);
-    buttonDown.attachLongPressStart(handleDownButtonLongPressStart);
-    buttonDown.attachLongPressStop(handleDownButtonLongPressStop);
-    buttonPower.attachClick(handlePowerButtonClick);
-    buttonPower.attachLongPressStart(handlePowerButtonLongPressStart);
+  // attach button functions
+  buttonUp.attachClick(handleUpButtonClick);
+  buttonUp.attachLongPressStart(handleUpButtonLongPressStart);
+  buttonDown.attachClick(handleDownButtonClick);
+  buttonDown.attachLongPressStart(handleDownButtonLongPressStart);
+  buttonDown.attachLongPressStop(handleDownButtonLongPressStop);
+  buttonPower.attachClick(handlePowerButtonClick);
+  buttonPower.attachLongPressStart(handlePowerButtonLongPressStart);
 
-    // setup serial ports
-    Serial.begin(9600);
-    SerialPort.begin(9600, SERIAL_8N1, 16, 17);
+  // setup serial ports
+  Serial.begin(9600);
+  SerialPort.begin(9600, SERIAL_8N1, 16, 17);
 }
 
 void loop() {
-    updateCursor();
-    // put your main code here, to run repeatedly:
-    buttonUp.tick();
-    buttonDown.tick();
-    buttonPower.tick();
-    delay(10);
+  updateCursor();
+  // put your main code here, to run repeatedly:
+  buttonUp.tick();
+  buttonDown.tick();
+  buttonPower.tick();
+  delay(10);
 }
 
 void handleUpButtonClick() {
-    if (settingsMenu) {
-        if (cursorPositionCounter > 0 && !selectedOption) {
-            cursorPositionCounter--;
-            calculateCursorPosition();
-        } else if (selectedOption) {
-            handleChange(cursorPositionCounter, "UP");
-        }
+  if (settingsMenu) {
+    if (cursorPositionCounter > 0 && !selectedOption) {
+      cursorPositionCounter--;
+      calculateCursorPosition();
+    } else if (selectedOption) {
+      handleChange(cursorPositionCounter, "UP");
     }
+  }
 }
 
 void handleDownButtonClick() {
-    if (settingsMenu) {
-        if (cursorPositionCounter < 14 && !selectedOption) {
-            cursorPositionCounter++;
-            calculateCursorPosition();
-        } else if (selectedOption) {
-            handleChange(cursorPositionCounter, "DOWN");
-        }
+  if (settingsMenu) {
+    if (cursorPositionCounter < 14 && !selectedOption) {
+      cursorPositionCounter++;
+      calculateCursorPosition();
+    } else if (selectedOption) {
+      handleChange(cursorPositionCounter, "DOWN");
     }
+  }
 }
 
 void handleUpButtonLongPressStart() {
-    Serial.println("Up button long press start");
+  Serial.println("Up button long press start");
 }
 
 void handleDownButtonLongPressStart() {
-    Serial.println("Down button long press start");
+  Serial.println("Down button long press start");
 }
 
 void handleDownButtonLongPressStop() {
-    Serial.println("Down button long press stop");
+  Serial.println("Down button long press stop");
 }
 
 void handlePowerButtonClick() {
-    if (selectedOption) {
-        deselectOption(cursorPositionCounter);
-    } else {
-        selectOption(cursorPositionCounter);
-    }
+  if (selectedOption) {
+    deselectOption(cursorPositionCounter);
+  } else {
+    selectOption(cursorPositionCounter);
+  }
 }
 
 void handlePowerButtonLongPressStart() {
-    if (!settingsMenu) {
-        renderSettingsMenu();
-        settingsMenu = !settingsMenu;
-    } else {
-        if (!selectedOption) {
-            initialRender();
-            settingsMenu = !settingsMenu;
-        }
+  if (!settingsMenu) {
+    renderSettingsMenu();
+    settingsMenu = !settingsMenu;
+  } else {
+    if (!selectedOption) {
+      initialRender();
+      settingsMenu = !settingsMenu;
     }
+  }
 }
 
 void initialRender() {
-    tft.fillScreen(TFT_BLACK);
-    // Draw battery
-    tft.drawRoundRect(10, 16, 80, 24, 4, TFT_GREEN);
-    tft.fillRect(90, 23, 3, 10, TFT_GREEN);
-    tft.fillRoundRect(92, 23, 3, 10, 2, TFT_GREEN);
+  tft.fillScreen(TFT_BLACK);
+  // Draw battery
+  tft.drawRoundRect(10, 16, 80, 24, 4, TFT_GREEN);
+  tft.fillRect(90, 23, 3, 10, TFT_GREEN);
+  tft.fillRoundRect(92, 23, 3, 10, 2, TFT_GREEN);
 
-    tft.drawFastHLine(0, 54, 240, TFT_WHITE);
-    tft.drawFastHLine(0, 248, 240, TFT_WHITE);
+  tft.drawFastHLine(0, 54, 240, TFT_WHITE);
+  tft.drawFastHLine(0, 248, 240, TFT_WHITE);
 }
 
 void renderSettingsMenu() {
-    tft.fillScreen(TFT_BLACK);
-    tft.setTextFont(4);
-    tft.setCursor(16, 16);
-    tft.print("Settings");
-    tft.drawFastHLine(0, 54, 240, TFT_WHITE);
-    tft.setTextFont(2);
-    for (int i = 0; i < MENU_SIZE; i++) {
-        if (i < 9) {
-            tft.setCursor(8, 72 + (i * 18));
-        } else {
-            tft.setCursor(128, 72 + ((i - 9) * 18));
-        }
-        tft.print(NAMES[i]);
-        tft.print(": ");
-        tft.print(VALUES[i]);
+  tft.fillScreen(TFT_BLACK);
+  tft.setTextFont(4);
+  tft.setCursor(16, 16);
+  tft.print("Settings");
+  tft.drawFastHLine(0, 54, 240, TFT_WHITE);
+  tft.setTextFont(2);
+  for (int i = 0; i < MENU_SIZE; i++) {
+    if (i < 9) {
+      tft.setCursor(8, 72 + (i * 18));
+    } else {
+      tft.setCursor(128, 72 + ((i - 9) * 18));
     }
+    tft.print(NAMES[i]);
+    tft.print(": ");
+    tft.print(VALUES[i]);
+  }
 }
 
 void calculateCursorPosition() {
-    if (cursorPositionCounter < 9) {
-        cursorPosition[0] = 102;
-        cursorPosition[1] = cursorPositionCounter * 18 + 80;
-    } else {
-        cursorPosition[0] = 202;
-        cursorPosition[1] = (cursorPositionCounter - 9) * 18 + 80;
-    }
+  if (cursorPositionCounter < 9) {
+    cursorPosition[0] = 102;
+    cursorPosition[1] = cursorPositionCounter * 18 + 80;
+  } else {
+    cursorPosition[0] = 202;
+    cursorPosition[1] = (cursorPositionCounter - 9) * 18 + 80;
+  }
 }
 
 void updateCursor() {
-    if (cursorPosition[0] != previousCursorPosition[0] || cursorPosition[1] != previousCursorPosition[1]) {
-        tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 8, previousCursorPosition[0] + 8, previousCursorPosition[1] - 8, TFT_BLACK);
-        tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 8, cursorPosition[0] + 8, cursorPosition[1] - 8, TFT_WHITE);
-        previousCursorPosition[0] = cursorPosition[0];
-        previousCursorPosition[1] = cursorPosition[1];
-    }
+  if (cursorPosition[0] != previousCursorPosition[0] || cursorPosition[1] != previousCursorPosition[1]) {
+    tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 8, previousCursorPosition[0] + 8, previousCursorPosition[1] - 8, TFT_BLACK);
+    tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 8, cursorPosition[0] + 8, cursorPosition[1] - 8, TFT_WHITE);
+    previousCursorPosition[0] = cursorPosition[0];
+    previousCursorPosition[1] = cursorPosition[1];
+  }
 }
 
 void selectOption(int position) {
-    selectedOption = true;
-    if (position < 9) {
-        tft.setCursor(8, 72 + (position * 18));
-    } else {
-        tft.setCursor(128, 72 + ((position - 9) * 18));
-    }
-    tft.print(NAMES[position]);
-    tft.print(": ");
-    tft.setTextColor(TFT_YELLOW, 0);
-    tft.print(VALUES[position]);
-    tft.setTextColor(TFT_WHITE, 0);
+  selectedOption = true;
+  if (position < 9) {
+    tft.setCursor(8, 72 + (position * 18));
+  } else {
+    tft.setCursor(128, 72 + ((position - 9) * 18));
+  }
+  tft.print(NAMES[position]);
+  tft.print(": ");
+  tft.setTextColor(TFT_YELLOW, 0);
+  tft.print(VALUES[position]);
+  tft.setTextColor(TFT_WHITE, 0);
 }
 
 void deselectOption(int position) {
-    selectedOption = false;
-    if (position < 9) {
-        tft.setCursor(8, 72 + (position * 18));
-    } else {
-        tft.setCursor(128, 72 + ((position - 9) * 18));
-    }
-    tft.print(NAMES[position]);
-    tft.print(": ");
-    tft.print(VALUES[position]);
+  selectedOption = false;
+  if (position < 9) {
+    tft.setCursor(8, 72 + (position * 18));
+  } else {
+    tft.setCursor(128, 72 + ((position - 9) * 18));
+  }
+  tft.print(NAMES[position]);
+  tft.print(": ");
+  tft.print(VALUES[position]);
 }
 
 void handleChange(int position, String direction) {
-    if (direction == "UP") {
-        if (VALUES[position] < MAX_VALUES[position]) {
-            VALUES[position]++;
-        }
-    } else if (direction == "DOWN") {
-        if (VALUES[position] > MIN_VALUES[position]) {
-            VALUES[position]--;
-        }
+  if (direction == "UP") {
+    if (VALUES[position] < MAX_VALUES[position]) {
+      VALUES[position]++;
     }
-    if (position < 9) {
-        tft.setCursor(8, 72 + (position * 18));
-    } else {
-        tft.setCursor(128, 72 + ((position - 9) * 18));
+  } else if (direction == "DOWN") {
+    if (VALUES[position] > MIN_VALUES[position]) {
+      VALUES[position]--;
     }
-    tft.print(NAMES[position]);
-    tft.print(": ");
-    tft.setTextColor(TFT_YELLOW, 0);
-    tft.print(VALUES[position]);
-    tft.setTextColor(TFT_WHITE, 0);
+  }
+  if (position < 9) {
+    tft.setCursor(8, 72 + (position * 18));
+  } else {
+    tft.setCursor(128, 72 + ((position - 9) * 18));
+  }
+  tft.print(NAMES[position]);
+  tft.print(": ");
+  tft.setTextColor(TFT_YELLOW, 0);
+  tft.print(VALUES[position]);
+  tft.setTextColor(TFT_WHITE, 0);
 }
