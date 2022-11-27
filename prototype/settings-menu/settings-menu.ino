@@ -23,9 +23,11 @@ int cursorPosition[2] = {102, 80};
 int previousCursorPosition[2] = {0, 0};
 
 String NAMES[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14"};
-int VALUES[MENU_SIZE] = {72, 26, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
-int MIN_VALUES[MENU_SIZE] = {10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-int MAX_VALUES[MENU_SIZE] = {72, 29, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
+int VALUES[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
+int MIN_VALUES[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+int MAX_VALUES[MENU_SIZE] = {72, 14, 14, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
+
+const int WHEEL_SIZE_TABLE[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
 
 bool settingsMenu = false;
 bool selectedOption = false;
@@ -137,16 +139,38 @@ void renderSettingsMenu() {
   tft.setCursor(16, 16);
   tft.print("Settings");
   tft.drawFastHLine(0, 54, 240, TFT_WHITE);
+  tft.drawFastHLine(0, 55, 240, TFT_WHITE);
+  tft.drawFastHLine(0, 56, 240, TFT_WHITE);
   tft.setTextFont(2);
+  tft.drawFastVLine(132, 55, 207, TFT_WHITE);
   for (int i = 0; i < MENU_SIZE; i++) {
     if (i < 9) {
-      tft.setCursor(8, 72 + (i * 18));
+      tft.setCursor(8, 66 + (i * 22));
+      tft.drawFastHLine(0, 63 + ((i + 1) * 22), 132, TFT_WHITE);
     } else {
-      tft.setCursor(128, 72 + ((i - 9) * 18));
+      tft.setCursor(138, 66 + ((i - 9) * 22));
+      tft.drawFastHLine(132, 63 + ((i - 8) * 22), 108, TFT_WHITE);
     }
     tft.print(NAMES[i]);
     tft.print(": ");
-    tft.print(VALUES[i]);
+    if (i == 1) {
+      int a = WHEEL_SIZE_TABLE[VALUES[i]][0] / 10;
+      int b = WHEEL_SIZE_TABLE[VALUES[i]][0] - a * 10;
+
+      if (b > 0) {
+        tft.print(a);
+        tft.print(".");
+        tft.print(b);
+      } else {
+        tft.print(a);
+        tft.print("  ");
+      }
+    } else {
+      tft.print(VALUES[i]);
+    }
+    tft.drawFastHLine(0, 261, 240, TFT_WHITE);
+    tft.drawFastHLine(0, 262, 240, TFT_WHITE);
+    tft.drawFastHLine(0, 263, 240, TFT_WHITE);
   }
   calculateCursorPosition();
   updateCursor(true);
@@ -154,18 +178,18 @@ void renderSettingsMenu() {
 
 void calculateCursorPosition() {
   if (cursorPositionCounter < 9) {
-    cursorPosition[0] = 102;
-    cursorPosition[1] = cursorPositionCounter * 18 + 80;
+    cursorPosition[0] = 116;
+    cursorPosition[1] = cursorPositionCounter * 22 + 74;
   } else {
     cursorPosition[0] = 202;
-    cursorPosition[1] = (cursorPositionCounter - 9) * 18 + 80;
+    cursorPosition[1] = (cursorPositionCounter - 9) * 22 + 74;
   }
 }
 
 void updateCursor(bool force) {
   if (cursorPosition[0] != previousCursorPosition[0] || cursorPosition[1] != previousCursorPosition[1] || force) {
-    tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 8, previousCursorPosition[0] + 8, previousCursorPosition[1] - 8, TFT_BLACK);
-    tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 8, cursorPosition[0] + 8, cursorPosition[1] - 8, TFT_WHITE);
+    tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 6, previousCursorPosition[0] + 8, previousCursorPosition[1] - 6, TFT_BLACK);
+    tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 6, cursorPosition[0] + 8, cursorPosition[1] - 6, TFT_WHITE);
     previousCursorPosition[0] = cursorPosition[0];
     previousCursorPosition[1] = cursorPosition[1];
   }
@@ -174,27 +198,51 @@ void updateCursor(bool force) {
 void selectOption(int position) {
   selectedOption = true;
   if (position < 9) {
-    tft.setCursor(8, 72 + (position * 18));
+    tft.setCursor(8, 66 + (position * 22));
   } else {
-    tft.setCursor(128, 72 + ((position - 9) * 18));
+    tft.setCursor(138, 66 + ((position - 9) * 22));
   }
   tft.print(NAMES[position]);
   tft.print(": ");
   tft.setTextColor(TFT_YELLOW, 0);
-  tft.print(VALUES[position]);
+  if (position == 1) {
+    int a = WHEEL_SIZE_TABLE[VALUES[position]][0] / 10;
+    int b = WHEEL_SIZE_TABLE[VALUES[position]][0] - a * 10;
+    tft.print(a);
+    if (b > 0) {
+      tft.print(".");
+      tft.print(b);
+    } else {
+      tft.print("  ");
+    }
+  } else {
+    tft.print(VALUES[position]);
+  }
   tft.setTextColor(TFT_WHITE, 0);
 }
 
 void deselectOption(int position) {
   selectedOption = false;
   if (position < 9) {
-    tft.setCursor(8, 72 + (position * 18));
+    tft.setCursor(8, 66 + (position * 22));
   } else {
-    tft.setCursor(128, 72 + ((position - 9) * 18));
+    tft.setCursor(138, 66 + ((position - 9) * 22));
   }
   tft.print(NAMES[position]);
   tft.print(": ");
-  tft.print(VALUES[position]);
+  if (position == 1) {
+    int a = WHEEL_SIZE_TABLE[VALUES[position]][0] / 10;
+    int b = WHEEL_SIZE_TABLE[VALUES[position]][0] - a * 10;
+    tft.print(a);
+    if (b > 0) {
+      tft.print(".");
+      tft.print(b);
+    } else {
+      tft.print("  ");
+    }
+  } else {
+    tft.print(VALUES[position]);
+  }
 }
 
 void handleChange(int position, String direction) {
@@ -208,13 +256,25 @@ void handleChange(int position, String direction) {
     }
   }
   if (position < 9) {
-    tft.setCursor(8, 72 + (position * 18));
+    tft.setCursor(8, 66 + (position * 22));
   } else {
-    tft.setCursor(128, 72 + ((position - 9) * 18));
+    tft.setCursor(138, 66 + ((position - 9) * 22));
   }
   tft.print(NAMES[position]);
   tft.print(": ");
   tft.setTextColor(TFT_YELLOW, 0);
-  tft.print(VALUES[position]);
+  if (position == 1) {
+    int a = WHEEL_SIZE_TABLE[VALUES[position]][0] / 10;
+    int b = WHEEL_SIZE_TABLE[VALUES[position]][0] - a * 10;
+    tft.print(a);
+    if (b > 0) {
+      tft.print(".");
+      tft.print(b);
+    } else {
+      tft.print("  ");
+    }
+  } else {
+    tft.print(VALUES[position]);
+  }
   tft.setTextColor(TFT_WHITE, 0);
 }
