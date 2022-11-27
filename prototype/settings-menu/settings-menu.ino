@@ -7,6 +7,8 @@
 // EEPROM defines
 #define EEPROM_SIZE 512
 #define MENU_SIZE 15
+#define BUFFER_SIZE 12
+#define BUFFER_SIZE_UP 13
 
 OneButton buttonUp(14, true);
 OneButton buttonDown(13, true);
@@ -29,10 +31,6 @@ const int MAX_VALUES[MENU_SIZE] = {72, 14, 14, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5
 const int WHEEL_SIZE_TABLE[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
 
 int speedLimit = VALUES[0];
-
-// initialize byte arrays for serial communication
-const int BUFFER_SIZE = 12;
-const int BUFFER_SIZE_UP = 13;
 
 byte SETTINGS[BUFFER_SIZE_UP];
 byte buf_up[BUFFER_SIZE_UP];
