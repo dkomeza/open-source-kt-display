@@ -54,8 +54,9 @@ void setup() {
 }
 
 void loop() {
-  updateCursor();
-  // put your main code here, to run repeatedly:
+  if (settingsMenu) {
+    updateCursor(false);
+  }
   buttonUp.tick();
   buttonDown.tick();
   buttonPower.tick();
@@ -97,10 +98,12 @@ void handleDownButtonLongPressStop() {
 }
 
 void handlePowerButtonClick() {
-  if (selectedOption) {
-    deselectOption(cursorPositionCounter);
-  } else {
-    selectOption(cursorPositionCounter);
+  if (settingsMenu) {
+    if (selectedOption) {
+      deselectOption(cursorPositionCounter);
+    } else {
+      selectOption(cursorPositionCounter);
+    }
   }
 }
 
@@ -112,6 +115,7 @@ void handlePowerButtonLongPressStart() {
     if (!selectedOption) {
       initialRender();
       settingsMenu = !settingsMenu;
+      cursorPositionCounter = 0;
     }
   }
 }
@@ -144,6 +148,8 @@ void renderSettingsMenu() {
     tft.print(": ");
     tft.print(VALUES[i]);
   }
+  calculateCursorPosition();
+  updateCursor(true);
 }
 
 void calculateCursorPosition() {
@@ -156,8 +162,8 @@ void calculateCursorPosition() {
   }
 }
 
-void updateCursor() {
-  if (cursorPosition[0] != previousCursorPosition[0] || cursorPosition[1] != previousCursorPosition[1]) {
+void updateCursor(bool force) {
+  if (cursorPosition[0] != previousCursorPosition[0] || cursorPosition[1] != previousCursorPosition[1] || force) {
     tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 8, previousCursorPosition[0] + 8, previousCursorPosition[1] - 8, TFT_BLACK);
     tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 8, cursorPosition[0] + 8, cursorPosition[1] - 8, TFT_WHITE);
     previousCursorPosition[0] = cursorPosition[0];
