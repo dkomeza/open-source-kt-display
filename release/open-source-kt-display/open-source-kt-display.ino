@@ -4,7 +4,6 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>
 
-// defines
 #define EEPROM_SIZE 512
 #define MENU_SIZE 15
 #define BUFFER_SIZE 12
@@ -27,8 +26,6 @@ byte buf_up[BUFFER_SIZE_UP];
 
 // initialize variables
 int counter = 0;
-
-// initialize variables
 int batteryLevel = 0;
 int speed = 0;
 int power = 0;
@@ -52,10 +49,9 @@ int speedLimit = 0;
 // gear color - 0: yellow (normal), 1: green ("legal mode"), 2: red (braking)
 int gearColor = 0;
 
+// initialize variables for settings menu
 bool settingsMenu = false;
 bool selectedOption = false;
-
-// initialize variables for settings menu
 int cursorPositionCounter = 0;
 int cursorPosition[2] = {102, 80};
 int previousCursorPosition[2] = {0, 0};
