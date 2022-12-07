@@ -57,9 +57,10 @@ int cursorPosition[2] = {102, 80};
 int previousCursorPosition[2] = {0, 0};
 
 String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14"};
-int values[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
+int values[MENU_SIZE];
 const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
+const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
 const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
 byte settings[BUFFER_SIZE_UP];
 
@@ -84,6 +85,9 @@ void setup() {
   // get data from eeprom
   limitState = EEPROM.readBool(20);
   currentGear = EEPROM.read(21);
+  if (currentGear > 5) {
+    currentGear = 0;
+  }
 
   // load settings
   getDataFromEEPROM();
@@ -645,9 +649,24 @@ void calculatePacket() {
   settings[5] = calculateUpCRC(settings);
 }
 
-void getDataFromEEPROM() {
+bool checkInitialData() {
   for (int i = 0; i < 15; i++) {
-    values[i] = EEPROM.read(i);
+    if (EEPROM.read(i) > maxValues[i] || EEPROM.read(i) < minValues[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void getDataFromEEPROM() {
+  if (checkInitialData()) {
+    for (int i = 0; i < 15; i++) {
+      values[i] = EEPROM.read(i);
+    }
+  } else {
+    for (int i = 0; i < 15; i++) {
+      values[i] = defaultValues[i];
+    }
   }
 }
 
