@@ -46,8 +46,6 @@ int previousColor = -1;
 // initialize variables for "legal mode"
 int previousGearWalk = 0;
 int maxGear = 5;
-int initialMaxSpeedB2 = 0;
-int initialMaxSpeedB4 = 0;
 int limitState = 0;
 int speedLimit = 0;
 
