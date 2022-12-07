@@ -60,12 +60,12 @@ int cursorPositionCounter = 0;
 int cursorPosition[2] = {102, 80};
 int previousCursorPosition[2] = {0, 0};
 
-String NAMES[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14"};
-int VALUES[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
-const int MIN_VALUES[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-const int MAX_VALUES[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
-const int WHEEL_SIZE_TABLE[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
-byte SETTINGS[BUFFER_SIZE_UP];
+String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14"};
+int values[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
+const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
+const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
+byte settings[BUFFER_SIZE_UP];
 
 void setup() {
   // setup display
@@ -190,7 +190,7 @@ void handlePowerButtonClick() {
 }
 void handlePowerButtonLongPressStart() {
   if (!settingsMenu) {
-    renderSettingsMenu();
+    rendersettingsMenu();
     settingsMenu = !settingsMenu;
   } else {
     if (!selectedOption) {
@@ -471,11 +471,11 @@ void updatePower() {
   tft.println("W");
 }
 
-void renderSettingsMenu() {
+void rendersettingsMenu() {
   tft.fillScreen(TFT_BLACK);
   tft.setTextFont(4);
   tft.setCursor(16, 16);
-  tft.print("Settings");
+  tft.print("settings");
   tft.drawFastHLine(0, 54, 240, TFT_WHITE);
   tft.drawFastHLine(0, 55, 240, TFT_WHITE);
   tft.drawFastHLine(0, 56, 240, TFT_WHITE);
@@ -489,11 +489,11 @@ void renderSettingsMenu() {
       tft.setCursor(138, 66 + ((i - 9) * 22));
       tft.drawFastHLine(132, 63 + ((i - 8) * 22), 108, TFT_WHITE);
     }
-    tft.print(NAMES[i]);
+    tft.print(names[i]);
     tft.print(": ");
     if (i == 1) {
-      int a = WHEEL_SIZE_TABLE[VALUES[i]][0] / 10;
-      int b = WHEEL_SIZE_TABLE[VALUES[i]][0] - a * 10;
+      int a = wheelSizeTable[VALUES[i]][0] / 10;
+      int b = wheelSizeTable[VALUES[i]][0] - a * 10;
 
       if (b > 0) {
         tft.print(a);
@@ -546,12 +546,12 @@ void selectOption(int position) {
   } else {
     tft.setCursor(138, 66 + ((position - 9) * 22));
   }
-  tft.print(NAMES[position]);
+  tft.print(names[position]);
   tft.print(": ");
   tft.setTextColor(TFT_YELLOW, 0);
   if (position == 1) {
-    int a = WHEEL_SIZE_TABLE[VALUES[position]][0] / 10;
-    int b = WHEEL_SIZE_TABLE[VALUES[position]][0] - a * 10;
+    int a = wheelSizeTable[VALUES[position]][0] / 10;
+    int b = wheelSizeTable[VALUES[position]][0] - a * 10;
     tft.print(a);
     if (b > 0) {
       tft.print(".");
@@ -572,11 +572,11 @@ void deselectOption(int position) {
   } else {
     tft.setCursor(138, 66 + ((position - 9) * 22));
   }
-  tft.print(NAMES[position]);
+  tft.print(names[position]);
   tft.print(": ");
   if (position == 1) {
-    int a = WHEEL_SIZE_TABLE[VALUES[position]][0] / 10;
-    int b = WHEEL_SIZE_TABLE[VALUES[position]][0] - a * 10;
+    int a = wheelSizeTable[VALUES[position]][0] / 10;
+    int b = wheelSizeTable[VALUES[position]][0] - a * 10;
     tft.print(a);
     if (b > 0) {
       tft.print(".");
@@ -593,12 +593,12 @@ void deselectOption(int position) {
 
 void handleChange(int position, String direction) {
   if (direction == "UP") {
-    if (VALUES[position] < MAX_VALUES[position]) {
-      VALUES[position]++;
+    if (VALUES[position] < maxValues[position]) {
+      values[position]++;
     }
   } else if (direction == "DOWN") {
-    if (VALUES[position] > MIN_VALUES[position]) {
-      VALUES[position]--;
+    if (VALUES[position] > minValues[position]) {
+      values[position]--;
     }
   }
   if (position < 9) {
@@ -606,12 +606,12 @@ void handleChange(int position, String direction) {
   } else {
     tft.setCursor(138, 66 + ((position - 9) * 22));
   }
-  tft.print(NAMES[position]);
+  tft.print(names[position]);
   tft.print(": ");
   tft.setTextColor(TFT_YELLOW, 0);
   if (position == 1) {
-    int a = WHEEL_SIZE_TABLE[VALUES[position]][0] / 10;
-    int b = WHEEL_SIZE_TABLE[VALUES[position]][0] - a * 10;
+    int a = wheelSizeTable[VALUES[position]][0] / 10;
+    int b = wheelSizeTable[VALUES[position]][0] - a * 10;
     tft.print(a);
     if (b > 0) {
       tft.print(".");
@@ -631,33 +631,33 @@ void calculatePacket() {
   if (speedLimit > 0) {
     speed = speedLimit;
   } else {
-    speed = VALUES[0];
+    speed = values[0];
   }
-  SETTINGS[0] = VALUES[6];
-  SETTINGS[1] = currentGear;
-  SETTINGS[2] = (((speed - 10) & 31) << 3) | (WHEEL_SIZE_TABLE[VALUES[1]][1] >> 2);
-  SETTINGS[3] = VALUES[2];
-  SETTINGS[4] = ((WHEEL_SIZE_TABLE[VALUES[1]][1] & 3) << 6) | ((speed - 10) & 32) | (VALUES[5] << 4) | VALUES[4] << 3 | VALUES[3];
-  SETTINGS[5] = 0;
-  SETTINGS[6] = (VALUES[7] << 3) | VALUES[8];
-  SETTINGS[7] = (VALUES[14] << 5) | VALUES[10] | 128;
-  SETTINGS[8] = (VALUES[9] << 5) | VALUES[12];
-  SETTINGS[9] = 20;
-  SETTINGS[10] = VALUES[13] << 2 | 1;
-  SETTINGS[11] = 50;
-  SETTINGS[12] = 14;
-  SETTINGS[5] = calculateUpCRC(SETTINGS);
+  settings[0] = values[6];
+  settings[1] = currentGear;
+  settings[2] = (((speed - 10) & 31) << 3) | (wheelSizeTable[VALUES[1]][1] >> 2);
+  settings[3] = values[2];
+  settings[4] = ((wheelSizeTable[VALUES[1]][1] & 3) << 6) | ((speed - 10) & 32) | (VALUES[5] << 4) | values[4] << 3 | values[3];
+  settings[5] = 0;
+  settings[6] = (VALUES[7] << 3) | values[8];
+  settings[7] = (VALUES[14] << 5) | values[10] | 128;
+  settings[8] = (VALUES[9] << 5) | values[12];
+  settings[9] = 20;
+  settings[10] = values[13] << 2 | 1;
+  settings[11] = 50;
+  settings[12] = 14;
+  settings[5] = calculateUpCRC(settings);
 }
 
 void getDataFromEEPROM() {
   for (int i = 0; i < 15; i++) {
-    VALUES[i] = EEPROM.read(i);
+    values[i] = EEPROM.read(i);
   }
 }
 
 void saveDataToEEPROM() {
   for (int i = 0; i < 15; i++) {
-    EEPROM.write(i, VALUES[i]);
+    EEPROM.write(i, values[i]);
   }
   EEPROM.commit();
 }
@@ -665,13 +665,13 @@ void saveDataToEEPROM() {
 void drawPacket() {
   tft.setCursor(8, 280);
   for (int i = 0; i < BUFFER_SIZE_UP; i++) {
-    tft.print(SETTINGS[i]);
+    tft.print(settings[i]);
     tft.print(", ");
   }
 }
 
 void saveToLocal() {
   for (int i = 0; i < 15; i++) {
-    buf_up[i] = SETTINGS[i];
+    buf_up[i] = settings[i];
   }
 }
