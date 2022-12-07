@@ -57,9 +57,10 @@ int cursorPosition[2] = {102, 80};
 int previousCursorPosition[2] = {0, 0};
 
 String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14"};
-int values[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
+int values[MENU_SIZE];
 const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
+const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
 const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
 byte settings[BUFFER_SIZE_UP];
 
@@ -84,6 +85,9 @@ void setup() {
   // get data from eeprom
   limitState = EEPROM.readBool(20);
   currentGear = EEPROM.read(21);
+  if (currentGear > 5) {
+    currentGear = 0;
+  }
 
   // load settings
   getDataFromEEPROM();
@@ -488,8 +492,8 @@ void rendersettingsMenu() {
     tft.print(names[i]);
     tft.print(": ");
     if (i == 1) {
-      int a = wheelSizeTable[VALUES[i]][0] / 10;
-      int b = wheelSizeTable[VALUES[i]][0] - a * 10;
+      int a = wheelSizeTable[values[i]][0] / 10;
+      int b = wheelSizeTable[values[i]][0] - a * 10;
 
       if (b > 0) {
         tft.print(a);
@@ -500,7 +504,7 @@ void rendersettingsMenu() {
         tft.print("  ");
       }
     } else {
-      tft.print(VALUES[i]);
+      tft.print(values[i]);
     }
   }
   tft.drawFastHLine(0, 261, 240, TFT_WHITE);
@@ -546,8 +550,8 @@ void selectOption(int position) {
   tft.print(": ");
   tft.setTextColor(TFT_YELLOW, 0);
   if (position == 1) {
-    int a = wheelSizeTable[VALUES[position]][0] / 10;
-    int b = wheelSizeTable[VALUES[position]][0] - a * 10;
+    int a = wheelSizeTable[values[position]][0] / 10;
+    int b = wheelSizeTable[values[position]][0] - a * 10;
     tft.print(a);
     if (b > 0) {
       tft.print(".");
@@ -556,7 +560,7 @@ void selectOption(int position) {
       tft.print("  ");
     }
   } else {
-    tft.print(VALUES[position]);
+    tft.print(values[position]);
   }
   tft.setTextColor(TFT_WHITE, 0);
 }
@@ -571,8 +575,8 @@ void deselectOption(int position) {
   tft.print(names[position]);
   tft.print(": ");
   if (position == 1) {
-    int a = wheelSizeTable[VALUES[position]][0] / 10;
-    int b = wheelSizeTable[VALUES[position]][0] - a * 10;
+    int a = wheelSizeTable[values[position]][0] / 10;
+    int b = wheelSizeTable[values[position]][0] - a * 10;
     tft.print(a);
     if (b > 0) {
       tft.print(".");
@@ -581,7 +585,7 @@ void deselectOption(int position) {
       tft.print("  ");
     }
   } else {
-    tft.print(VALUES[position]);
+    tft.print(values[position]);
   }
   calculatePacket();
   drawPacket();
@@ -589,11 +593,11 @@ void deselectOption(int position) {
 
 void handleChange(int position, String direction) {
   if (direction == "UP") {
-    if (VALUES[position] < maxValues[position]) {
+    if (values[position] < maxValues[position]) {
       values[position]++;
     }
   } else if (direction == "DOWN") {
-    if (VALUES[position] > minValues[position]) {
+    if (values[position] > minValues[position]) {
       values[position]--;
     }
   }
@@ -606,8 +610,8 @@ void handleChange(int position, String direction) {
   tft.print(": ");
   tft.setTextColor(TFT_YELLOW, 0);
   if (position == 1) {
-    int a = wheelSizeTable[VALUES[position]][0] / 10;
-    int b = wheelSizeTable[VALUES[position]][0] - a * 10;
+    int a = wheelSizeTable[values[position]][0] / 10;
+    int b = wheelSizeTable[values[position]][0] - a * 10;
     tft.print(a);
     if (b > 0) {
       tft.print(".");
@@ -616,7 +620,7 @@ void handleChange(int position, String direction) {
       tft.print("  ");
     }
   } else {
-    tft.print(VALUES[position]);
+    tft.print(values[position]);
   }
   tft.setTextColor(TFT_WHITE, 0);
 }
@@ -631,13 +635,13 @@ void calculatePacket() {
   }
   settings[0] = values[6];
   settings[1] = currentGear;
-  settings[2] = (((speed - 10) & 31) << 3) | (wheelSizeTable[VALUES[1]][1] >> 2);
+  settings[2] = (((speed - 10) & 31) << 3) | (wheelSizeTable[values[1]][1] >> 2);
   settings[3] = values[2];
-  settings[4] = ((wheelSizeTable[VALUES[1]][1] & 3) << 6) | ((speed - 10) & 32) | (VALUES[5] << 4) | values[4] << 3 | values[3];
+  settings[4] = ((wheelSizeTable[values[1]][1] & 3) << 6) | ((speed - 10) & 32) | (values[5] << 4) | values[4] << 3 | values[3];
   settings[5] = 0;
-  settings[6] = (VALUES[7] << 3) | values[8];
-  settings[7] = (VALUES[14] << 5) | values[10] | 128;
-  settings[8] = (VALUES[9] << 5) | values[12];
+  settings[6] = (values[7] << 3) | values[8];
+  settings[7] = (values[14] << 5) | values[10] | 128;
+  settings[8] = (values[9] << 5) | values[12];
   settings[9] = 20;
   settings[10] = values[13] << 2 | 1;
   settings[11] = 50;
@@ -645,9 +649,24 @@ void calculatePacket() {
   settings[5] = calculateUpCRC(settings);
 }
 
-void getDataFromEEPROM() {
+bool checkInitialData() {
   for (int i = 0; i < 15; i++) {
-    values[i] = EEPROM.read(i);
+    if (EEPROM.read(i) > maxValues[i] || EEPROM.read(i) < minValues[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void getDataFromEEPROM() {
+  if (checkInitialData()) {
+    for (int i = 0; i < 15; i++) {
+      values[i] = EEPROM.read(i);
+    }
+  } else {
+    for (int i = 0; i < 15; i++) {
+      values[i] = defaultValues[i];
+    }
   }
 }
 
