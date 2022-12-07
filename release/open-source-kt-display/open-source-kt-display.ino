@@ -109,7 +109,6 @@ void loop() {
   int SerialAvailableBits = SerialPort.available();
   if (SerialAvailableBits >= BUFFER_SIZE) {  // check if there are enough available bytes to read
     SerialPort.readBytes(buf, BUFFER_SIZE);  // read bytes to the buf array
-                                             // update variables (current gear and crc)
   } else {
     if (counter > 50) {
       SerialPort.begin(9600, SERIAL_8N1, 16, 17);
