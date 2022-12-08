@@ -8,6 +8,17 @@
 #define MENU_SIZE 15
 #define BUFFER_SIZE 12
 #define BUFFER_SIZE_UP 13
+#define TORQUE_ARRAY_SIZE 40
+
+#define BUTTON_UP 14
+#define BUTTON_DOWN 13
+#define BUTTON_POWER 12
+#define RX_PIN 16
+#define TX_PIN 17
+#define TORQUE_INPUT_PIN 32
+#define TORQUE_OUTPUT_PIN 25
+
+#define TORQUE_OFFSET 1.5
 
 // init buttons
 OneButton buttonUp(14, true);
@@ -64,6 +75,12 @@ const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4
 const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
 byte settings[BUFFER_SIZE_UP];
 
+// initialize variables for torque sensor
+int currentTorque = 0;
+int torqueVoltage = 0;
+
+int torqueArray[TORQUE_ARRAY_SIZE];
+
 void setup() {
   // setup display
   tft.init();
@@ -95,6 +112,8 @@ void setup() {
   saveToLocal();
 
   handleLimit();
+
+  populateTorqueArray();
 
   // setup serial ports
   Serial.begin(9600);
@@ -689,4 +708,44 @@ void saveToLocal() {
   for (int i = 0; i < 15; i++) {
     buf_up[i] = settings[i];
   }
+}
+
+void populateTorqueArray() {
+  for (int i = 0; i < TORQUE_ARRAY_SIZE; i++) {
+    torqueArray[i] = 0;
+  }
+}
+
+void handleTorqueSensor() {
+  currentTorque = analogRead(TORQUE_INPUT_PIN);
+  if (currentTorque > 0) {
+    shiftTorqueArray(currentTorque);
+  }
+  currentTorque = torqueArrayMax();
+  int writeTorque = map(currentTorque, 0, 330, 0, 255);
+  analogWrite(TORQUE_OUTPUT_PIN, writeTorque);
+}
+
+void shiftTorqueArray(int value) {
+  for (int i = 0; i < TORQUE_ARRAY_SIZE - 1; i++) {
+    torqueArray[i] = torqueArray[i + 1];
+  }
+  torqueArray[TORQUE_ARRAY_SIZE - 1] = value;
+}
+
+int torqueArrayMax() {
+  int max = 0;
+  for (int i = 0; i < TORQUE_ARRAY_SIZE; i++) {
+    if (torqueArray[i] > max) {
+      max = torqueArray[i];
+    }
+  }
+  max = map(max, 0, 1023, 0, 330);
+  max /= 100;
+  if (max > TORQUE_OFFSET) {
+    max -= TORQUE_OFFSET;
+  } else {
+    max = 0;
+  }
+  return max;
 }
