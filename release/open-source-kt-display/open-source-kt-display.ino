@@ -237,7 +237,7 @@ void handlePowerButtonLongPressStart() {
       saveDataToEEPROM();
       saveToLocal();
       handleDisplay(true);
-      updateGear(true, gearColor);
+      updateGear();
     }
   }
 }
@@ -358,7 +358,7 @@ bool shiftArray(int counter) {
     memcpy(buf, newBuf, sizeof(newBuf));
     crc = calculateDownCRC();
     if (buf[0] != 65 || buf[6] != crc) {
-      int currentCounter = counter += 1;
+      int currentCounter = counter + 1;
       shiftArray(currentCounter);
     } else {
       return true;
