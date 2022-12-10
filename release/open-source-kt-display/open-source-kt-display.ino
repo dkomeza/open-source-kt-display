@@ -20,6 +20,22 @@
 
 #define TORQUE_OFFSET 1.5
 
+#define SPEED_LIMIT values[0]
+#define WHEEL_SIZE values[1]
+#define P1 values[2]
+#define P2 values[3]
+#define P3 values[4]
+#define P4 values[5]
+#define P5 values[6]
+#define C1 values[7]
+#define C2 values[8]
+#define C4 values[9]
+#define C5 values[10]
+#define C11 values[11]
+#define C12 values[12]
+#define C13 values[13]
+#define C14 values[14]
+
 // init buttons
 OneButton buttonUp(14, true);
 OneButton buttonDown(13, true);
@@ -43,22 +59,20 @@ int power = 0;
 int engineTemp = 0;
 int controllerTemp = 0;
 int currentGear = 0;
+int gearColor = 0;  // gear color - 0: yellow (normal), 1: green ("legal mode"), 2: red (braking)
 
 // initialize variables for previous state to prevent unnecessary updates
 int previousBatteryLevel = -1;
 int previousEngineTemp = -1;
 int previousControllerTemp = -1;
 int previousGear = -1;
-int previousColor = -1;
+int previousGearColor = -1;
 
 // initialize variables for "legal mode"
 int previousGearWalk = 0;
 int maxGear = 5;
 int limitState = 0;
 int speedLimit = 0;
-
-// gear color - 0: yellow (normal), 1: green ("legal mode"), 2: red (braking)
-int gearColor = 0;
 
 // initialize variables for settings menu
 bool settingsMenu = false;
@@ -76,6 +90,7 @@ const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120
 byte settings[BUFFER_SIZE_UP];
 
 // initialize variables for torque sensor
+bool enableTorqueSensor = false;
 int currentTorque = 0;
 int torqueVoltage = 0;
 
@@ -102,6 +117,7 @@ void setup() {
   // get data from eeprom
   limitState = EEPROM.readBool(20);
   currentGear = EEPROM.read(21);
+  enableTorqueSensor = EEPROM.readBool(22);
   if (currentGear > 5) {
     currentGear = 0;
   }
@@ -137,19 +153,17 @@ void loop() {
 
   processPacket();     // process packet from the controller
   if (settingsMenu) {  // render settings menu
-    updateCursor(false);
     if (millis() - time < 50) {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
     }
   } else {
-    // if (validPacket) {       // if the packet is valid render the display, otherwise skip the render
-    handleDisplay(false);  // render normal display without force update
-    // }
+    if (validPacket) {       // if the packet is valid render the display, otherwise skip the render
+      handleDisplay(false);  // render normal display without force update
+    }
     if (millis() - time < 50) {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
     }
   }
-  updateGear(false, gearColor);
 
   SerialPort.write(buf_up, BUFFER_SIZE_UP);  // send packet to the controller
 
@@ -164,6 +178,7 @@ void handleUpButtonClick() {
     if (cursorPositionCounter > 0 && !selectedOption) {
       cursorPositionCounter--;
       calculateCursorPosition();
+      updateCursor();
     } else if (selectedOption) {
       handleChange(cursorPositionCounter, "UP");
     }
@@ -176,6 +191,7 @@ void handleDownButtonClick() {
     if (cursorPositionCounter < 14 && !selectedOption) {
       cursorPositionCounter++;
       calculateCursorPosition();
+      updateCursor();
     } else if (selectedOption) {
       handleChange(cursorPositionCounter, "DOWN");
     }
@@ -205,6 +221,8 @@ void handlePowerButtonClick() {
     } else {
       selectOption(cursorPositionCounter);
     }
+  } else {
+    toggleTorqueSensor();
   }
 }
 void handlePowerButtonLongPressStart() {
@@ -232,6 +250,7 @@ void increaseGear() {
     saveToLocal();
     EEPROM.write(21, currentGear);
     EEPROM.commit();
+    updateGear();
   }
 }
 void decreaseGear() {
@@ -241,6 +260,7 @@ void decreaseGear() {
     saveToLocal();
     EEPROM.write(21, currentGear);
     EEPROM.commit();
+    updateGear();
   }
 }
 void startWalkMode() {
@@ -248,17 +268,26 @@ void startWalkMode() {
   currentGear = 6;
   calculatePacket();
   saveToLocal();
+  updateGear();
 }
 void stopWalkMode() {
   currentGear = previousGearWalk;
   calculatePacket();
   saveToLocal();
+  updateGear();
 }
 void toggleLimit() {
   limitState = !limitState;
   EEPROM.writeBool(20, limitState);
   EEPROM.commit();
   handleLimit();
+}
+void toggleTorqueSensor() {
+  enableTorqueSensor = !enableTorqueSensor;
+  calculatePacket();
+  saveToLocal();
+  EEPROM.writeBool(22, enableTorqueSensor);
+  EEPROM.commit();
 }
 
 // group of functions for dealing with the data
@@ -340,7 +369,7 @@ bool shiftArray(int counter) {
 void handleLimit() {
   if (limitState) {
     gearColor = 0;
-    updateGear(true, gearColor);
+    updateGear();
     if (currentGear > 2) {
       currentGear = 2;
     }
@@ -350,7 +379,7 @@ void handleLimit() {
     saveToLocal();
   } else {
     gearColor = 1;
-    updateGear(true, gearColor);
+    updateGear();
     maxGear = 5;
     speedLimit = 0;
     calculatePacket();
@@ -420,22 +449,18 @@ void updateSpeed() {
   }
 }
 // drawing the current gear
-void updateGear(bool force, int color) {
-  if (previousGear != currentGear || force || previousColor != color) {
-    tft.setTextFont(7);
-    tft.setTextSize(1);
-    if (color == 0) {
-      tft.setTextColor(TFT_GREEN, 0);
-    } else if (color == 1) {
-      tft.setTextColor(TFT_YELLOW, 0);
-    } else {
-      tft.setTextColor(TFT_RED, 0);
-    }
-    tft.setCursor(108, 180);
-    tft.print(currentGear);
-    previousGear = currentGear;
-    previousColor = color;
+void updateGear() {
+  tft.setTextFont(7);
+  tft.setTextSize(1);
+  if (gearColor == 0) {
+    tft.setTextColor(TFT_GREEN, 0);
+  } else if (gearColor == 1) {
+    tft.setTextColor(TFT_YELLOW, 0);
+  } else {
+    tft.setTextColor(TFT_RED, 0);
   }
+  tft.setCursor(108, 180);
+  tft.print(currentGear);
 }
 // drawing the current engine temperature
 void updateEngineTemp(bool force) {
@@ -536,7 +561,7 @@ void rendersettingsMenu() {
   calculateCursorPosition();
   calculatePacket();
   drawPacket();
-  updateCursor(true);
+  updateCursor();
 }
 
 void calculateCursorPosition() {
@@ -549,8 +574,8 @@ void calculateCursorPosition() {
   }
 }
 
-void updateCursor(bool force) {
-  if (cursorPosition[0] != previousCursorPosition[0] || cursorPosition[1] != previousCursorPosition[1] || force) {
+void updateCursor() {
+  if (cursorPosition[0] != previousCursorPosition[0] || cursorPosition[1] != previousCursorPosition[1]) {
     tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 6, previousCursorPosition[0] + 8, previousCursorPosition[1] - 6, TFT_BLACK);
     tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 6, cursorPosition[0] + 8, cursorPosition[1] - 6, TFT_WHITE);
     previousCursorPosition[0] = cursorPosition[0];
@@ -645,24 +670,25 @@ void handleChange(int position, String direction) {
 }
 
 void calculatePacket() {
-  Serial.println("Calculating packet");
   int speed = 0;
   if (speedLimit > 0) {
     speed = speedLimit;
   } else {
-    speed = values[0];
+    speed = SPEED_LIMIT;
   }
-  settings[0] = values[6];
-  settings[1] = currentGear;
-  settings[2] = (((speed - 10) & 31) << 3) | (wheelSizeTable[values[1]][1] >> 2);
-  settings[3] = values[2];
-  settings[4] = ((wheelSizeTable[values[1]][1] & 3) << 6) | ((speed - 10) & 32) | (values[5] << 4) | values[4] << 3 | values[3];
+  int P_4 = enableTorqueSensor ? 1 : P4;
+  int C_4 = enableTorqueSensor ? 0 : C4;
+  settings[0] = P5;
+  settings[1] = enableTorqueSensor ? 0 : currentGear;
+  settings[2] = (((speed - 10) & 31) << 3) | (wheelSizeTable[WHEEL_SIZE][1] >> 2);
+  settings[3] = P3;
+  settings[4] = ((wheelSizeTable[WHEEL_SIZE][1] & 3) << 6) | ((speed - 10) & 32) | (P_4 << 4) | P3 << 3 | P2;
   settings[5] = 0;
-  settings[6] = (values[7] << 3) | values[8];
-  settings[7] = (values[14] << 5) | values[10] | 128;
-  settings[8] = (values[9] << 5) | values[12];
+  settings[6] = (C1 << 3) | C2;
+  settings[7] = (C14 << 5) | C5 | 128;
+  settings[8] = (C_4 << 5) | C12;
   settings[9] = 20;
-  settings[10] = values[13] << 2 | 1;
+  settings[10] = C13 << 2 | 1;
   settings[11] = 50;
   settings[12] = 14;
   settings[5] = calculateUpCRC(settings);
@@ -723,7 +749,9 @@ void handleTorqueSensor() {
   }
   currentTorque = torqueArrayMax();
   int writeTorque = map(currentTorque, 0, 330, 0, 255);
-  analogWrite(TORQUE_OUTPUT_PIN, writeTorque);
+  if (enableTorqueSensor) {
+    analogWrite(TORQUE_OUTPUT_PIN, writeTorque);
+  }
 }
 
 void shiftTorqueArray(int value) {
