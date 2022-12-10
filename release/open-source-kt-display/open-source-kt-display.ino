@@ -757,8 +757,8 @@ void handleTorqueSensor() {
   if (currentTorque > 0) {
     shiftTorqueArray(currentTorque);
   }
-  currentTorque = torqueArrayMax();
-  int writeTorque = map(currentTorque, 0, 330, 0, 255);
+  int writeTorque = torqueArrayMax();
+  int writeTorque = calculateTorqueOutput(torqueArrayMax());
   if (enableTorqueSensor) {
     analogWrite(TORQUE_OUTPUT_PIN, writeTorque);
   } else {
@@ -780,12 +780,16 @@ int torqueArrayMax() {
       max = torqueArray[i];
     }
   }
-  max = map(max, 0, 1023, 0, 330);
-  max /= 100;
-  if (max > TORQUE_OFFSET) {
-    max -= TORQUE_OFFSET;
-  } else {
-    max = 0;
-  }
   return max;
+}
+
+int calculateTorqueOutput(int torque) {
+  int writeTorque = map(torque, 0, 1024, 0, 3301);
+  writeTorque -= 1500;
+  if (writeTorque < 0) {
+    writeTorque = 0;
+  } else if (writeTorque > 1500) {
+    writeTorque = 1500;
+  }
+  return map(writeTorque, 0, 1501, 39, 163);
 }
