@@ -5,7 +5,7 @@
 #include <TFT_eSPI.h>
 
 #define EEPROM_SIZE 512
-#define MENU_SIZE 15
+#define MENU_SIZE 16
 #define BUFFER_SIZE 12
 #define BUFFER_SIZE_UP 13
 #define TORQUE_ARRAY_SIZE 40
@@ -35,11 +35,12 @@
 #define C12 values[12]
 #define C13 values[13]
 #define C14 values[14]
+#define T1 values[15]
 
 // init buttons
-OneButton buttonUp(14, true);
-OneButton buttonDown(13, true);
-OneButton buttonPower(12, true);
+OneButton buttonUp(BUTTON_UP, true);
+OneButton buttonDown(BUTTON_DOWN, true);
+OneButton buttonPower(BUTTON_POWER, true);
 
 // initialize display
 TFT_eSPI tft = TFT_eSPI(240, 320);
@@ -81,11 +82,11 @@ int cursorPositionCounter = 0;
 int cursorPosition[2] = {102, 80};
 int previousCursorPosition[2] = {0, 0};
 
-String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14"};
+String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14", "T1"};
 int values[MENU_SIZE];
-const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3};
-const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1};
+const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 500};
+const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3, 2000};
+const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1, 1000};
 const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
 byte settings[BUFFER_SIZE_UP];
 
@@ -188,7 +189,7 @@ void handleUpButtonClick() {
 }
 void handleDownButtonClick() {
   if (settingsMenu) {
-    if (cursorPositionCounter < 14 && !selectedOption) {
+    if (cursorPositionCounter < MENU_SIZE - 1 && !selectedOption) {
       cursorPositionCounter++;
       calculateCursorPosition();
       updateCursor();
@@ -518,6 +519,7 @@ void updatePower() {
 void rendersettingsMenu() {
   tft.fillScreen(TFT_BLACK);
   tft.setTextFont(4);
+  tft.setTextColor(TFT_WHITE, 0);
   tft.setCursor(16, 16);
   tft.print("settings");
   tft.drawFastHLine(0, 54, 240, TFT_WHITE);
@@ -569,7 +571,7 @@ void calculateCursorPosition() {
     cursorPosition[0] = 116;
     cursorPosition[1] = cursorPositionCounter * 22 + 74;
   } else {
-    cursorPosition[0] = 202;
+    cursorPosition[0] = 228;
     cursorPosition[1] = (cursorPositionCounter - 9) * 22 + 74;
   }
 }
@@ -638,11 +640,19 @@ void deselectOption(int position) {
 void handleChange(int position, String direction) {
   if (direction == "UP") {
     if (values[position] < maxValues[position]) {
-      values[position]++;
+      if (position == 15) {
+        values[position] += 50;
+      } else {
+        values[position]++;
+      }
     }
   } else if (direction == "DOWN") {
     if (values[position] > minValues[position]) {
-      values[position]--;
+      if (position == 15) {
+        values[position] -= 50;
+      } else {
+        values[position]--;
+      }
     }
   }
   if (position < 9) {
@@ -681,7 +691,7 @@ void calculatePacket() {
   settings[0] = P5;
   settings[1] = enableTorqueSensor ? 0 : currentGear;
   settings[2] = (((speed - 10) & 31) << 3) | (wheelSizeTable[WHEEL_SIZE][1] >> 2);
-  settings[3] = P3;
+  settings[3] = P1;
   settings[4] = ((wheelSizeTable[WHEEL_SIZE][1] & 3) << 6) | ((speed - 10) & 32) | (P_4 << 4) | P3 << 3 | P2;
   settings[5] = 0;
   settings[6] = (C1 << 3) | C2;
@@ -695,7 +705,7 @@ void calculatePacket() {
 }
 
 bool checkInitialData() {
-  for (int i = 0; i < 15; i++) {
+  for (int i = 0; i < MENU_SIZE; i++) {
     if (EEPROM.read(i) > maxValues[i] || EEPROM.read(i) < minValues[i]) {
       return false;
     }
@@ -705,18 +715,18 @@ bool checkInitialData() {
 
 void getDataFromEEPROM() {
   if (checkInitialData()) {
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < MENU_SIZE; i++) {
       values[i] = EEPROM.read(i);
     }
   } else {
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < MENU_SIZE; i++) {
       values[i] = defaultValues[i];
     }
   }
 }
 
 void saveDataToEEPROM() {
-  for (int i = 0; i < 15; i++) {
+  for (int i = 0; i < MENU_SIZE; i++) {
     EEPROM.write(i, values[i]);
   }
   EEPROM.commit();
@@ -731,7 +741,7 @@ void drawPacket() {
 }
 
 void saveToLocal() {
-  for (int i = 0; i < 15; i++) {
+  for (int i = 0; i < MENU_SIZE; i++) {
     buf_up[i] = settings[i];
   }
 }
@@ -751,6 +761,8 @@ void handleTorqueSensor() {
   int writeTorque = map(currentTorque, 0, 330, 0, 255);
   if (enableTorqueSensor) {
     analogWrite(TORQUE_OUTPUT_PIN, writeTorque);
+  } else {
+    analogWrite(TORQUE_OUTPUT_PIN, 0);
   }
 }
 
@@ -763,7 +775,7 @@ void shiftTorqueArray(int value) {
 
 int torqueArrayMax() {
   int max = 0;
-  for (int i = 0; i < TORQUE_ARRAY_SIZE; i++) {
+  for (int i = TORQUE_ARRAY_SIZE - (T1 / 50); i < TORQUE_ARRAY_SIZE; i++) {
     if (torqueArray[i] > max) {
       max = torqueArray[i];
     }
