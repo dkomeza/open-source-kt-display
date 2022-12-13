@@ -18,7 +18,9 @@
 #define TORQUE_INPUT_PIN 32
 #define TORQUE_OUTPUT_PIN 25
 
-#define TORQUE_OFFSET 1.5
+#define TORQUE_OFFSET 1500
+#define TORQUE_OUTPUT_MIN 39   // 0.5V (later multiplied by 2 by the opamp to get 1V - min control voltage)
+#define TORQUE_OUTPUT_MAX 163  // 2.1V (later multiplied by 2 by the opamp to get 4.2V - max control voltage)
 
 #define SPEED_LIMIT values[0]
 #define WHEEL_SIZE values[1]
@@ -158,9 +160,9 @@ void loop() {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
     }
   } else {
-    if (validPacket) {       // if the packet is valid render the display, otherwise skip the render
-      handleDisplay(false);  // render normal display without force update
-    }
+    // if (validPacket) {       // if the packet is valid render the display, otherwise skip the render
+    handleDisplay(false);  // render normal display without force update
+    // }
     if (millis() - time < 50) {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
     }
@@ -397,6 +399,7 @@ void handleDisplay(bool force) {
   updateControllerTemp();
   updatePower();
   updateSpeed();
+  updateTorqueIcon();
 }
 // drawing the empty screen with lines and a battery outline
 void initialRender() {
@@ -515,6 +518,14 @@ void updatePower() {
   tft.print(power);
   tft.println("W");
 }
+// drawing the torque sensor icon
+void updateTorqueIcon() {
+  if (enableTorqueSensor) {
+    tft.drawCircle(88, 180, 8, TFT_GREEN);
+  } else {
+    tft.drawCircle(88, 180, 8, TFT_BLACK);
+  }
+}
 
 void rendersettingsMenu() {
   tft.fillScreen(TFT_BLACK);
@@ -577,12 +588,10 @@ void calculateCursorPosition() {
 }
 
 void updateCursor() {
-  if (cursorPosition[0] != previousCursorPosition[0] || cursorPosition[1] != previousCursorPosition[1]) {
-    tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 6, previousCursorPosition[0] + 8, previousCursorPosition[1] - 6, TFT_BLACK);
-    tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 6, cursorPosition[0] + 8, cursorPosition[1] - 6, TFT_WHITE);
-    previousCursorPosition[0] = cursorPosition[0];
-    previousCursorPosition[1] = cursorPosition[1];
-  }
+  tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 6, previousCursorPosition[0] + 8, previousCursorPosition[1] - 6, TFT_BLACK);
+  tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 6, cursorPosition[0] + 8, cursorPosition[1] - 6, TFT_WHITE);
+  previousCursorPosition[0] = cursorPosition[0];
+  previousCursorPosition[1] = cursorPosition[1];
 }
 
 void selectOption(int position) {
@@ -745,7 +754,7 @@ void saveToLocal() {
     buf_up[i] = settings[i];
   }
 }
-
+// fill the torque array with 0
 void populateTorqueArray() {
   for (int i = 0; i < TORQUE_ARRAY_SIZE; i++) {
     torqueArray[i] = 0;
@@ -757,7 +766,6 @@ void handleTorqueSensor() {
   if (currentTorque > 0) {
     shiftTorqueArray(currentTorque);
   }
-  int writeTorque = torqueArrayMax();
   int writeTorque = calculateTorqueOutput(torqueArrayMax());
   if (enableTorqueSensor) {
     analogWrite(TORQUE_OUTPUT_PIN, writeTorque);
@@ -784,12 +792,12 @@ int torqueArrayMax() {
 }
 
 int calculateTorqueOutput(int torque) {
-  int writeTorque = map(torque, 0, 1024, 0, 3301);
-  writeTorque -= 1500;
+  int writeTorque = map(torque, 0, 4096, 0, 3301);  // map adc readout to voltage (mV)
+  writeTorque -= TORQUE_OFFSET;                     // subtract offset
   if (writeTorque < 0) {
-    writeTorque = 0;
+    return 0;
   } else if (writeTorque > 1500) {
     writeTorque = 1500;
   }
-  return map(writeTorque, 0, 1501, 39, 163);
+  return map(writeTorque, 0, 1501, TORQUE_OUTPUT_MIN, TORQUE_OUTPUT_MAX);
 }
