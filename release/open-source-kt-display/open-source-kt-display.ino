@@ -89,7 +89,7 @@ int values[MENU_SIZE];
 const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 500};
 const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3, 2000};
 const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1, 1000};
-const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};
+const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};  // {wheel size * 10, byte value}
 byte settings[BUFFER_SIZE_UP];
 
 // initialize variables for torque sensor
@@ -175,7 +175,9 @@ void loop() {
   buttonPower.tick();
 }
 
-// group of functions for handling the buttons
+/*
+ * group of functions for handling with buttons
+ */
 void handleUpButtonClick() {
   if (settingsMenu) {
     if (cursorPositionCounter > 0 && !selectedOption) {
@@ -245,7 +247,9 @@ void handlePowerButtonLongPressStart() {
   }
 }
 
-// group of functions for dealing with buttons
+/*
+ * group of functions for dealing with buttons
+ */
 void increaseGear() {
   if (currentGear < maxGear) {
     currentGear++;
@@ -293,7 +297,9 @@ void toggleTorqueSensor() {
   EEPROM.commit();
 }
 
-// group of functions for dealing with the data
+/*
+ * group of functions for dealing with the display
+ */
 // calculating the crc value for the packet to be sent to the controller
 int calculateUpCRC(byte packet[]) {
   int crc = 0;
@@ -390,7 +396,9 @@ void handleLimit() {
   }
 }
 
-// group of functions for dealing with display
+/*
+ * group of functions for handling the display
+ */
 // main function for rendering the display
 void handleDisplay(bool force) {
   tft.setTextFont(0);
@@ -527,6 +535,10 @@ void updateTorqueIcon() {
   }
 }
 
+/*
+ * Menu functions
+ */
+// initial render of the menu
 void rendersettingsMenu() {
   tft.fillScreen(TFT_BLACK);
   tft.setTextFont(4);
@@ -576,7 +588,7 @@ void rendersettingsMenu() {
   drawPacket();
   updateCursor();
 }
-
+// calculate x and y position of the cursor
 void calculateCursorPosition() {
   if (cursorPositionCounter < 9) {
     cursorPosition[0] = 116;
@@ -586,14 +598,14 @@ void calculateCursorPosition() {
     cursorPosition[1] = (cursorPositionCounter - 9) * 22 + 74;
   }
 }
-
+// change the cursor position based on the user input
 void updateCursor() {
   tft.fillTriangle(previousCursorPosition[0], previousCursorPosition[1], previousCursorPosition[0] + 8, previousCursorPosition[1] + 6, previousCursorPosition[0] + 8, previousCursorPosition[1] - 6, TFT_BLACK);
   tft.fillTriangle(cursorPosition[0], cursorPosition[1], cursorPosition[0] + 8, cursorPosition[1] + 6, cursorPosition[0] + 8, cursorPosition[1] - 6, TFT_WHITE);
   previousCursorPosition[0] = cursorPosition[0];
   previousCursorPosition[1] = cursorPosition[1];
 }
-
+// mark the current option as selected
 void selectOption(int position) {
   selectedOption = true;
   if (position < 9) {
@@ -619,7 +631,7 @@ void selectOption(int position) {
   }
   tft.setTextColor(TFT_WHITE, 0);
 }
-
+// mark the current option as unselected and update the value
 void deselectOption(int position) {
   selectedOption = false;
   if (position < 9) {
@@ -645,7 +657,7 @@ void deselectOption(int position) {
   calculatePacket();
   drawPacket();
 }
-
+// change the value of the selected option based on the user input
 void handleChange(int position, String direction) {
   if (direction == "UP") {
     if (values[position] < maxValues[position]) {
@@ -687,7 +699,7 @@ void handleChange(int position, String direction) {
   }
   tft.setTextColor(TFT_WHITE, 0);
 }
-
+// calculate the packet based on the current settings
 void calculatePacket() {
   int speed = 0;
   if (speedLimit > 0) {
@@ -712,7 +724,7 @@ void calculatePacket() {
   settings[12] = 14;
   settings[5] = calculateUpCRC(settings);
 }
-
+// check if the data in the EEPROM is valid
 bool checkInitialData() {
   for (int i = 0; i < MENU_SIZE; i++) {
     if (EEPROM.read(i) > maxValues[i] || EEPROM.read(i) < minValues[i]) {
@@ -721,7 +733,7 @@ bool checkInitialData() {
   }
   return true;
 }
-
+// read the data from the EEPROM
 void getDataFromEEPROM() {
   if (checkInitialData()) {
     for (int i = 0; i < MENU_SIZE; i++) {
@@ -733,14 +745,14 @@ void getDataFromEEPROM() {
     }
   }
 }
-
+// save the data to the EEPROM
 void saveDataToEEPROM() {
   for (int i = 0; i < MENU_SIZE; i++) {
     EEPROM.write(i, values[i]);
   }
   EEPROM.commit();
 }
-
+// draw the packet on the bottom of the screen
 void drawPacket() {
   tft.setCursor(8, 280);
   for (int i = 0; i < BUFFER_SIZE_UP; i++) {
@@ -748,19 +760,23 @@ void drawPacket() {
     tft.print(", ");
   }
 }
-
+// copy the settings to the buffer
 void saveToLocal() {
   for (int i = 0; i < MENU_SIZE; i++) {
     buf_up[i] = settings[i];
   }
 }
-// fill the torque array with 0
+
+/*
+ *  Torque sensor functions
+ */
+// fill the torque array with 0s
 void populateTorqueArray() {
   for (int i = 0; i < TORQUE_ARRAY_SIZE; i++) {
     torqueArray[i] = 0;
   }
 }
-
+// function to handle the torque sensor
 void handleTorqueSensor() {
   currentTorque = analogRead(TORQUE_INPUT_PIN);
   if (currentTorque > 0) {
@@ -773,24 +789,24 @@ void handleTorqueSensor() {
     analogWrite(TORQUE_OUTPUT_PIN, 0);
   }
 }
-
+// add a new value to the torque array and shift the rest of the values
 void shiftTorqueArray(int value) {
   for (int i = 0; i < TORQUE_ARRAY_SIZE - 1; i++) {
     torqueArray[i] = torqueArray[i + 1];
   }
   torqueArray[TORQUE_ARRAY_SIZE - 1] = value;
 }
-
+// get the maximum value from the last T1/50 values
 int torqueArrayMax() {
   int max = 0;
-  for (int i = TORQUE_ARRAY_SIZE - (T1 / 50); i < TORQUE_ARRAY_SIZE; i++) {
+  for (int i = TORQUE_ARRAY_SIZE - (T1 / 50); i < TORQUE_ARRAY_SIZE; i++) {  // Select the last T1/50 values (T1 - user defined, 50 - 50ms loop time)
     if (torqueArray[i] > max) {
       max = torqueArray[i];
     }
   }
   return max;
 }
-
+// map the max torque value to the torque output range
 int calculateTorqueOutput(int torque) {
   int writeTorque = map(torque, 0, 4096, 0, 3301);  // map adc readout to voltage (mV)
   writeTorque -= TORQUE_OFFSET;                     // subtract offset
