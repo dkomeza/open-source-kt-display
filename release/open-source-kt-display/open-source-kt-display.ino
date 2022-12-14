@@ -98,7 +98,7 @@ byte settings[BUFFER_SIZE_UP];
 bool enableTorqueSensor = false;
 int currentTorque = 0;
 int torqueVoltage = 0;
-const int torqueOutputTable[TORQUE_OUTPUT_TABLE_SIZE] = {55, 70, 90, 125, 163}
+const int torqueOutputTable[TORQUE_OUTPUT_TABLE_SIZE] = {55, 70, 90, 125, 163};
 
 int torqueArray[TORQUE_ARRAY_SIZE];
 
