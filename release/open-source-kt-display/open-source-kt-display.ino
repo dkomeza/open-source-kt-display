@@ -61,7 +61,7 @@ byte buf_up[BUFFER_SIZE_UP];
 // initialize variables
 int counter = 0;
 int batteryLevel = 0;
-int batteryVoltage = 0;
+int batteryVoltage = 483;
 int speed = 0;
 int power = 0;
 int engineTemp = 0;
@@ -422,8 +422,9 @@ double getBatteryVoltage() {
  */
 // main function for rendering the display
 void handleDisplay(bool force) {
-  tft.setTextFont(0);
+  tft.setTextFont(4);
   updateBattery(batteryLevel / 4, force);
+  tft.setTextFont(0);
   updateEngineTemp(force);
   updateControllerTemp();
   updatePower();
@@ -455,10 +456,11 @@ void updateBattery(int bars, bool force) {
     previousBatteryLevel = batteryLevel;
   }
   if (previousBatteryVoltage != batteryVoltage || force) {
-    tft.setCursor(100, 16);
-    tft.setTextColor(TFT_WHITE, 0);
+    tft.setCursor(164, 16);
+    tft.setTextColor(TFT_GREEN, 0);
     int intPart = batteryVoltage / 10;
     int floatPart = batteryVoltage - (intPart * 10);
+    tft.setTextSize(1);
     tft.print(intPart);
     tft.print(".");
     tft.print(floatPart);
