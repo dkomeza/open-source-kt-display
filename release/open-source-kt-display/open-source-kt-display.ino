@@ -411,7 +411,7 @@ double getBatteryVoltage() {
   int avg = sum / 10;
   double voltage = map(avg, 0, 4096, 0, 3300);
   voltage /= 1000;
-  voltage += BATTERY_VOLTAGE_OFFSET;
+  voltage += (BATTERY_VOLTAGE_OFFSET / 100);
   double vin = voltage / 0.04852521;
   vin *= 10;
   return vin;
