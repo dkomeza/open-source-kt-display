@@ -9,6 +9,7 @@
 #define BUFFER_SIZE 12
 #define BUFFER_SIZE_UP 13
 #define TORQUE_ARRAY_SIZE 40
+#define TORQUE_OUTPUT_TABLE_SIZE 5
 
 #define BUTTON_UP 14
 #define BUTTON_DOWN 13
@@ -19,8 +20,9 @@
 #define TORQUE_OUTPUT_PIN 25
 
 #define TORQUE_OFFSET 1500
-#define TORQUE_OUTPUT_MIN 39   // 0.5V (later multiplied by 2 by the opamp to get 1V - min control voltage)
-#define TORQUE_OUTPUT_MAX 163  // 2.1V (later multiplied by 2 by the opamp to get 4.2V - max control voltage)
+#define TORQUE_OUTPUT_MIN 39  // 0.5V (later multiplied by 2 by the opamp to get 1V - min control voltage)
+
+// 39 - 0W, 163 - 1000W
 
 #define SPEED_LIMIT values[0]
 #define WHEEL_SIZE values[1]
@@ -96,6 +98,7 @@ byte settings[BUFFER_SIZE_UP];
 bool enableTorqueSensor = false;
 int currentTorque = 0;
 int torqueVoltage = 0;
+const int torqueOutputTable[TORQUE_OUTPUT_TABLE_SIZE] = {55, 70, 90, 125, 163};
 
 int torqueArray[TORQUE_ARRAY_SIZE];
 
@@ -810,10 +813,10 @@ int torqueArrayMax() {
 int calculateTorqueOutput(int torque) {
   int writeTorque = map(torque, 0, 4096, 0, 3301);  // map adc readout to voltage (mV)
   writeTorque -= TORQUE_OFFSET;                     // subtract offset
-  if (writeTorque < 0) {
+  if (writeTorque < 0 || currentGear == 0) {
     return 0;
   } else if (writeTorque > 1500) {
     writeTorque = 1500;
   }
-  return map(writeTorque, 0, 1501, TORQUE_OUTPUT_MIN, TORQUE_OUTPUT_MAX);
+  return map(writeTorque, 0, 1501, TORQUE_OUTPUT_MIN, torqueOutputTable[currentGear]);
 }
