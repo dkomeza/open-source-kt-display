@@ -5,7 +5,7 @@
 #include <TFT_eSPI.h>
 
 #define EEPROM_SIZE 512
-#define MENU_SIZE 16
+#define MENU_SIZE 17
 #define BUFFER_SIZE 12
 #define BUFFER_SIZE_UP 13
 #define TORQUE_ARRAY_SIZE 40
@@ -18,6 +18,7 @@
 #define TX_PIN 17
 #define TORQUE_INPUT_PIN 32
 #define TORQUE_OUTPUT_PIN 25
+#define BATTERY_INPUT_PIN 33
 
 #define TORQUE_OFFSET 1500
 #define TORQUE_OUTPUT_MIN 39  // 0.5V (later multiplied by 2 by the opamp to get 1V - min control voltage)
@@ -40,6 +41,7 @@
 #define C13 values[13]
 #define C14 values[14]
 #define T1 values[15]
+#define BATTERY_VOLTAGE_OFFSET values[16]
 
 // init buttons
 OneButton buttonUp(BUTTON_UP, true);
@@ -59,6 +61,7 @@ byte buf_up[BUFFER_SIZE_UP];
 // initialize variables
 int counter = 0;
 int batteryLevel = 0;
+int batteryVoltage = 483;
 int speed = 0;
 int power = 0;
 int engineTemp = 0;
@@ -68,6 +71,7 @@ int gearColor = 0;  // gear color - 0: yellow (normal), 1: green ("legal mode"),
 
 // initialize variables for previous state to prevent unnecessary updates
 int previousBatteryLevel = -1;
+int previousBatteryVoltage = -1;
 int previousEngineTemp = -1;
 int previousControllerTemp = -1;
 int previousGear = -1;
@@ -86,11 +90,11 @@ int cursorPositionCounter = 0;
 int cursorPosition[2] = {102, 80};
 int previousCursorPosition[2] = {0, 0};
 
-String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14", "T1"};
+String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14", "T1", "T2"};
 int values[MENU_SIZE];
-const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 500};
-const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3, 2000};
-const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1, 1000};
+const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 500, -100};
+const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 1, 4, 10, 3, 7, 5, 3, 2000, 100};
+const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1, 1000, 0};
 const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};  // {wheel size * 10, byte value}
 byte settings[BUFFER_SIZE_UP];
 
@@ -398,14 +402,29 @@ void handleLimit() {
     saveToLocal();
   }
 }
+// function to get battery voltage
+double getBatteryVoltage() {
+  int sum = 0;
+  for (int i = 0; i < 10; i++) {
+    sum += analogRead(BATTERY_INPUT_PIN);
+  }
+  int avg = sum / 10;
+  double voltage = map(avg, 0, 4096, 0, 3300);
+  voltage /= 1000;
+  voltage += (BATTERY_VOLTAGE_OFFSET / 100);
+  double vin = voltage / 0.04852521;
+  vin *= 10;
+  return vin;
+}
 
 /*
  * group of functions for handling the display
  */
 // main function for rendering the display
 void handleDisplay(bool force) {
-  tft.setTextFont(0);
+  tft.setTextFont(4);
   updateBattery(batteryLevel / 4, force);
+  tft.setTextFont(0);
   updateEngineTemp(force);
   updateControllerTemp();
   updatePower();
@@ -435,6 +454,17 @@ void updateBattery(int bars, bool force) {
       tft.fillRoundRect(x, 19, 17, 18, 2, TFT_GREEN);
     }
     previousBatteryLevel = batteryLevel;
+  }
+  if (previousBatteryVoltage != batteryVoltage || force) {
+    tft.setCursor(164, 16);
+    tft.setTextColor(TFT_GREEN, 0);
+    int intPart = batteryVoltage / 10;
+    int floatPart = batteryVoltage - (intPart * 10);
+    tft.setTextSize(1);
+    tft.print(intPart);
+    tft.print(".");
+    tft.print(floatPart);
+    tft.print("V");
   }
 }
 // drawing the current speed
