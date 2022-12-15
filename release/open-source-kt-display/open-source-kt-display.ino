@@ -232,7 +232,7 @@ void handlePowerButtonClick() {
 }
 void handlePowerButtonLongPressStart() {
   if (!settingsMenu) {
-    rendersettingsMenu();
+    renderSettingsMenu();
     settingsMenu = !settingsMenu;
   } else {
     if (!selectedOption) {
@@ -539,7 +539,7 @@ void updateTorqueIcon() {
  * Menu functions
  */
 // initial render of the menu
-void rendersettingsMenu() {
+void renderSettingsMenu() {
   tft.fillScreen(TFT_BLACK);
   tft.setTextFont(4);
   tft.setTextColor(TFT_WHITE, 0);
