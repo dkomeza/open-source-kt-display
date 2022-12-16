@@ -61,7 +61,7 @@ byte buf_up[BUFFER_SIZE_UP];
 // initialize variables
 int counter = 0;
 int batteryLevel = 0;
-int batteryVoltage = 483;
+int batteryVoltage = 0;
 int speed = 0;
 int power = 0;
 int engineTemp = 0;
@@ -161,7 +161,8 @@ void loop() {
   }
   bool validPacket = shiftArray(0);
 
-  processPacket();     // process packet from the controller
+  processPacket();  // process packet from the controller
+  getBatteryVoltage();
   if (settingsMenu) {  // render settings menu
     if (millis() - time < 50) {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
@@ -403,7 +404,7 @@ void handleLimit() {
   }
 }
 // function to get battery voltage
-double getBatteryVoltage() {
+void getBatteryVoltage() {
   int sum = 0;
   for (int i = 0; i < 10; i++) {
     sum += analogRead(BATTERY_INPUT_PIN);
@@ -414,7 +415,7 @@ double getBatteryVoltage() {
   voltage += (BATTERY_VOLTAGE_OFFSET / 100);
   double vin = voltage / 0.04852521;
   vin *= 10;
-  return vin;
+  batteryVoltage = vin;
 }
 
 /*
@@ -465,6 +466,7 @@ void updateBattery(int bars, bool force) {
     tft.print(".");
     tft.print(floatPart);
     tft.print("V");
+    previousBatteryVoltage = batteryVoltage;
   }
 }
 // drawing the current speed
