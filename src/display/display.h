@@ -17,6 +17,7 @@ class Display {
   void renderSettingsMenu(int menuSize, const String names[], const int wheelSizeTable[][2], int values[]);
   void updateCursorPosition(int previousCursorPosition[2], int cursorPosition[2]);
   void printOption(int cursorPositionCounter, String name, int value, int wheelSize, bool active);
+  void updateTorqueIcon(bool enableTorqueSensor);
 
  private:
   TFT_eSPI tft = TFT_eSPI(240, 320);

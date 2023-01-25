@@ -5,6 +5,7 @@
 #include "src/OTA.h"
 #include "src/display/display.h"
 #include "src/settings/settings.h"
+#include "src/torqueSensor/torqueSensor.h"
 
 #define EEPROM_SIZE 512
 #define BUFFER_SIZE 12
@@ -17,8 +18,7 @@
 #define BUTTON_POWER 12
 #define RX_PIN 16
 #define TX_PIN 17
-#define TORQUE_INPUT_PIN 32
-#define TORQUE_OUTPUT_PIN 25
+
 #define BATTERY_INPUT_PIN 33
 #define VOLTAGE_REFERENCE_PIN 34
 
@@ -55,6 +55,7 @@ int torqueArray[TORQUE_ARRAY_SIZE];
 
 Settings settings;
 Display display;
+TorqueSensor torqueSensor;
 
 void setup() {
   // init display
@@ -81,15 +82,11 @@ void setup() {
     settings.currentGear = 0;
   }
 
-  dacWrite(TORQUE_OUTPUT_PIN, 32);
-
-  // // load settings
+  // load settings
   settings.loadSettings();
   settings.calculatePacket();
 
   // handleLimit();
-
-  // populateTorqueArray();
 
   // setup serial ports
   Serial.begin(9600);
@@ -189,7 +186,11 @@ void handlePowerButtonClick() {
   if (settings.settingsMenu) {
     settings.toggleOption();
   } else {
-    // toggleTorqueSensor();
+    settings.enableTorqueSensor = !settings.enableTorqueSensor
+    settings.calculatePacket();
+    display.updateTorqueIcon(settigns.enableTorqueSensor);
+    EEPROM.writeBool(22, enableTorqueSensor);
+    EEPROM.commit();
   }
 }
 void handlePowerButtonLongPressStart() {
@@ -364,55 +365,4 @@ void getBatteryVoltage() {
   // double vin = voltage / 0.04852521;
   // vin *= 10;
   batteryVoltage = vin / 100;
-}
-
-/*
- *  Torque sensor functions
- */
-// fill the torque array with 0s
-void populateTorqueArray() {
-  for (int i = 0; i < TORQUE_ARRAY_SIZE; i++) {
-    torqueArray[i] = 0;
-  }
-}
-// function to handle the torque sensor
-void handleTorqueSensor() {
-  currentTorque = analogRead(TORQUE_INPUT_PIN);
-  if (currentTorque > 0) {
-    shiftTorqueArray(currentTorque);
-  }
-  int writeTorque = calculateTorqueOutput(torqueArrayMax());
-  if (enableTorqueSensor) {
-    dacWrite(TORQUE_OUTPUT_PIN, 32);
-  } else {
-    dacWrite(TORQUE_OUTPUT_PIN, 32);
-  }
-}
-// add a new value to the torque array and shift the rest of the values
-void shiftTorqueArray(int value) {
-  for (int i = 0; i < TORQUE_ARRAY_SIZE - 1; i++) {
-    torqueArray[i] = torqueArray[i + 1];
-  }
-  torqueArray[TORQUE_ARRAY_SIZE - 1] = value;
-}
-// get the maximum value from the last T1/50 values
-int torqueArrayMax() {
-  int max = 0;
-  for (int i = TORQUE_ARRAY_SIZE - (settings.torqueSensorCutOff / 50); i < TORQUE_ARRAY_SIZE; i++) {  // Select the last T1/50 values (T1 - user defined, 50 - 50ms loop time)
-    if (torqueArray[i] > max) {
-      max = torqueArray[i];
-    }
-  }
-  return max;
-}
-// map the max torque value to the torque output range
-int calculateTorqueOutput(int torque) {
-  int writeTorque = map(torque, 0, 4096, 0, 3301);  // map adc readout to voltage (mV)
-  writeTorque -= TORQUE_OFFSET;                     // subtract offset
-  if (writeTorque < 0 || settings.currentGear == 0) {
-    return 0;
-  } else if (writeTorque > 1500) {
-    writeTorque = 1500;
-  }
-  return map(writeTorque, 0, 1501, TORQUE_OUTPUT_MIN, torqueOutputTable[settings.currentGear]);
 }

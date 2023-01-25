@@ -283,3 +283,11 @@ void Display::updatePower(int power) {
   tft.print(power);
   tft.println("W");
 }
+
+void Display::updateTorqueIcon(bool enableTorqueSensor) {
+  if (enableTorqueSensor) {
+    tft.drawCircle(88, 180, 8, TFT_GREEN);
+  } else {
+    tft.drawCircle(88, 180, 8, TFT_BLACK);
+  }
+}
