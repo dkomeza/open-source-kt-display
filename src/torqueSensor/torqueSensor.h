@@ -1,5 +1,5 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef TORQUESENSOR_H
+#define TORQUESENSOR_H
 
 #define TORQUE_ARRAY_SIZE 40
 #define TORQUE_OUTPUT_TABLE_SIZE 5
@@ -25,3 +25,5 @@ class TorqueSensor {
         int torqueArrayMax();
         int calculateTorqueOutput(int torque);
 }
+
+#endif
