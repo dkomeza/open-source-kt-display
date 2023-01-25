@@ -63,9 +63,8 @@ void setup() {
 
   // load settings
   settings.loadSettings();
+  settings.handleLimit();
   settings.calculatePacket();
-
-  // handleLimit();
 
   // setup serial ports
   Serial.begin(9600);
@@ -221,12 +220,12 @@ void stopWalkMode() {
   settings.calculatePacket();
   display.updateGear(settings.currentGear, settings.gearColor);
 }
-// void toggleLimit() {
-//   limitState = !limitState;
-//   EEPROM.writeBool(20, limitState);
-//   EEPROM.commit();
-//   handleLimit();
-// }
+void toggleLimit() {
+  settings.limitState = !settings.limitState;
+  EEPROM.writeBool(20, settings.limitState);
+  EEPROM.commit();
+  settings.handleLimit();
+}
 // void toggleTorqueSensor() {
 //   enableTorqueSensor = !enableTorqueSensor;
 //   calculatePacket();
@@ -238,23 +237,3 @@ void stopWalkMode() {
 /*
  * group of functions for dealing with the display
  */
-
-// function to handle "legal mode"
-void handleLimit() {
-  if (settings.limitState) {
-    settings.gearColor = 0;
-    if (settings.currentGear > 2) {
-      settings.currentGear = 2;
-    }
-    settings.maxGear = 2;
-    settings.speedLimit = 25;
-    settings.calculatePacket();
-    display.updateGear(settings.currentGear, settings.gearColor);
-  } else {
-    settings.gearColor = 1;
-    settings.maxGear = 5;
-    settings.speedLimit = 0;
-    settings.calculatePacket();
-    display.updateGear(settings.currentGear, settings.gearColor);
-  }
-}

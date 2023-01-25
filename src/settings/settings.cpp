@@ -101,6 +101,25 @@ void Settings::calculatePacket() {
   settings[5] = calculateUpCRC(settings);
 }
 
+void Settings::handleLimit() {
+  if (limitState) {
+    gearColor = 0;
+    if (currentGear > 2) {
+      currentGear = 2;
+    }
+    maxGear = 2;
+    speedLimit = 25;
+    calculatePacket();
+    display.updateGear(currentGear, gearColor);
+  } else {
+    gearColor = 1;
+    maxGear = 5;
+    speedLimit = 0;
+    calculatePacket();
+    display.updateGear(currentGear, gearColor);
+  }
+}
+
 int Settings::calculateUpCRC(byte packet[]) {
   int crc = 0;
   for (int i = 0; i < BUFFER_SIZE_UP; i++) {

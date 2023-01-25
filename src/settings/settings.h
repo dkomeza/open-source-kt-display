@@ -75,6 +75,7 @@ class Settings {
   bool checkInitialSettings();
   void loadSettings();
   void saveSettings();
+  void handleLimit();
 };
 
 #endif
