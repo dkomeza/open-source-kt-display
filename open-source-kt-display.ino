@@ -61,15 +61,15 @@ void setup() {
     settings.currentGear = 0;
   }
 
-  // load settings
-  settings.loadSettings();
-  settings.handleLimit();
-  settings.calculatePacket();
-
   // setup serial ports
   Serial.begin(9600);
   SerialPort.begin(9600, SERIAL_8N1, 16, 17);
   setupOTA("OSKD");
+
+  // load settings
+  settings.loadSettings();
+  settings.handleLimit();
+  settings.calculatePacket();
 
   int sum = 0;
   for (int i = 0; i < 100; i++) {

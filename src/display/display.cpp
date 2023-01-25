@@ -116,6 +116,8 @@ void Display::renderSettingsMenu(int menuSize, const String names[], const int w
         tft.print(a);
         tft.print("  ");
       }
+    } else if (i == 15) {
+      tft.print(values[i] * 50);
     } else {
       tft.print(values[i]);
     }
@@ -127,8 +129,6 @@ void Display::renderSettingsMenu(int menuSize, const String names[], const int w
   tft.setTextFont(4);
   tft.print("Packet");
   tft.setTextFont(2);
-  // calculateCursorPosition();
-  // updateCursor();
 }
 
 /**
@@ -176,6 +176,8 @@ void Display::printOption(int cursorPositionCounter, String name, int value, int
     } else {
       tft.print("  ");
     }
+  } else if (cursorPositionCounter == 15) {
+    tft.print(value * 50);
   } else {
     tft.print(value);
   }
