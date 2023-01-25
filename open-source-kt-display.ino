@@ -11,8 +11,6 @@
 #define EEPROM_SIZE 512
 #define BUFFER_SIZE 12
 #define BUFFER_SIZE_UP 13
-#define TORQUE_ARRAY_SIZE 40
-#define TORQUE_OUTPUT_TABLE_SIZE 5
 
 #define BUTTON_UP 14
 #define BUTTON_DOWN 13
@@ -23,33 +21,15 @@
 #define BATTERY_INPUT_PIN 33
 #define VOLTAGE_REFERENCE_PIN 34
 
-#define TORQUE_OFFSET 1500
-#define TORQUE_OUTPUT_MIN 39  // 0.5V (later multiplied by 2 by the opamp to get 1V - min control voltage)
+int restartCounter = 0;
 
 // init buttons
-OneButton buttonUp(BUTTON_UP, true);
 OneButton buttonDown(BUTTON_DOWN, true);
+OneButton buttonUp(BUTTON_UP, true);
 OneButton buttonPower(BUTTON_POWER, true);
 
 // initialize serial port
 HardwareSerial SerialPort(2);
-
-// initialize variables
-int counter = 0;
-int batteryLevel = 0;
-int batteryVoltage = 0;
-int speed = 0;
-int engineTemp = 0;
-int controllerTemp = 0;
-int power = 0;
-
-// initialize variables for torque sensor
-bool enableTorqueSensor = false;
-int currentTorque = 0;
-int torqueVoltage = 0;
-const int torqueOutputTable[TORQUE_OUTPUT_TABLE_SIZE] = {55, 70, 90, 125, 163};
-
-int torqueArray[TORQUE_ARRAY_SIZE];
 
 Settings settings;
 Display display;
@@ -108,11 +88,11 @@ void loop() {
   if (SerialAvailableBits >= BUFFER_SIZE) {        // check if there are enough available bytes to read
     SerialPort.readBytes(logic.buf, BUFFER_SIZE);  // read bytes to the buf array
   } else {
-    if (counter > 50) {
+    if (restartCounter > 50) {
       SerialPort.begin(9600, SERIAL_8N1, 16, 17);
-      counter = 0;
+      restartCounter = 0;
     }
-    counter++;
+    restartCounter++;
   }
 
   bool validPacket = logic.processPacket();  // process the packet
@@ -129,6 +109,8 @@ void loop() {
     }
   }
   SerialPort.write(settings.settings, BUFFER_SIZE_UP);  // send packet to the controller
+
+  torqueSensor.handleTorqueSensor();
 
   buttonUp.tick();
   buttonDown.tick();
@@ -183,10 +165,10 @@ void handlePowerButtonClick() {
   if (settings.settingsMenu) {
     settings.toggleOption();
   } else {
-    settings.enableTorqueSensor = !settings.enableTorqueSensor
-                                       settings.calculatePacket();
-    display.updateTorqueIcon(settigns.enableTorqueSensor);
-    EEPROM.writeBool(22, enableTorqueSensor);
+    settings.enableTorqueSensor = !settings.enableTorqueSensor;
+    settings.calculatePacket();
+    display.updateTorqueIcon(settings.enableTorqueSensor);
+    EEPROM.writeBool(22, settings.enableTorqueSensor);
     EEPROM.commit();
   }
 }
@@ -201,7 +183,7 @@ void handlePowerButtonLongPressStart() {
       settings.cursorPositionCounter = 0;
       settings.saveSettings();
       settings.calculatePacket();
-      display.render(batteryLevel, batteryVoltage, speed, engineTemp, controllerTemp, power);
+      display.render(logic.batteryLevel, logic.batteryVoltage, logic.speed, logic.engineTemp, 0, logic.power);
       display.updateGear(settings.currentGear, settings.gearColor);
     }
   }

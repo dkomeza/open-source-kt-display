@@ -1,24 +1,23 @@
 #include "./torqueSensor.h"
 
 TorqueSensor::TorqueSensor() {
-    populateTorqueArray();
+  populateTorqueArray();
 }
 
 void TorqueSensor::handleTorqueSensor() {
-    currentTorque = analogRead(TORQUE_INPUT_PIN);
+  currentTorque = analogRead(TORQUE_INPUT_PIN);
   if (currentTorque > 0) {
     shiftTorqueArray(currentTorque);
   }
-  int writeTorque = calculateTorqueOutput(torqueArrayMax());
-    dacWrite(TORQUE_OUTPUT_PIN, writeTorque);
+  int writeTorque = settings.enableTorqueSensor ? calculateTorqueOutput(torqueArrayMax()) : 0;
+  dacWrite(TORQUE_OUTPUT_PIN, writeTorque);
 }
 
 void TorqueSensor::populateTorqueArray() {
-      for (int i = 0; i < TORQUE_ARRAY_SIZE; i++) {
+  for (int i = 0; i < TORQUE_ARRAY_SIZE; i++) {
     torqueArray[i] = 0;
   }
 }
-
 // add a new value to the torque array and shift the rest of the values
 void TorqueSensor::shiftTorqueArray(int value) {
   for (int i = 0; i < TORQUE_ARRAY_SIZE - 1; i++) {

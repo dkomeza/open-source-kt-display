@@ -9,6 +9,7 @@ class Logic {
  private:
   int calculateDownCRC();
   bool shiftArray(int counter);
+  int getBatteryVoltage();
 
  public:
   int speed = 0;
@@ -19,7 +20,7 @@ class Logic {
   bool braking = false;
   byte buf[BUFFER_SIZE];
 
-  void processPacket();
-}
+  bool processPacket();
+};
 
 #endif

@@ -7,23 +7,30 @@
 #define TORQUE_INPUT_PIN 32
 #define TORQUE_OUTPUT_PIN 25
 
+#define TORQUE_OFFSET 1500
+#define TORQUE_OUTPUT_MIN 39
+
 #include <Arduino.h>
 
+#include "../settings/settings.h"
+
 class TorqueSensor {
-    public:
-        TorqueSensor();
-        int currentTorque = 0;
-        int torqueVoltage = 0;
-        const int torqueOutputTable[TORQUE_OUTPUT_TABLE_SIZE] = {55, 70, 90, 125, 163};
-        int torqueArray[TORQUE_ARRAY_SIZE];
-        
-        void toggleTorqueSensor();
-        void handleTorqueSensor();
-    private:
-        void populateTorqueArray();
-        void shiftTorqueArray(int value);
-        int torqueArrayMax();
-        int calculateTorqueOutput(int torque);
-}
+ private:
+  const int torqueOutputTable[TORQUE_OUTPUT_TABLE_SIZE] = {55, 70, 90, 125, 163};
+  int torqueArray[TORQUE_ARRAY_SIZE];
+  int currentTorque = 0;
+  int torqueVoltage = 0;
+  Settings settings;
+
+ public:
+  TorqueSensor();
+  void handleTorqueSensor();
+
+ private:
+  void populateTorqueArray();
+  void shiftTorqueArray(int value);
+  int torqueArrayMax();
+  int calculateTorqueOutput(int torque);
+};
 
 #endif
