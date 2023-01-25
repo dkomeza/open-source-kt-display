@@ -1,5 +1,7 @@
 #include "./torqueSensor.h"
 
+#include "../logic/logic.h"
+
 TorqueSensor::TorqueSensor() {
   populateTorqueArray();
 }
@@ -28,7 +30,7 @@ void TorqueSensor::shiftTorqueArray(int value) {
 // get the maximum value from the last T1/50 values
 int TorqueSensor::torqueArrayMax() {
   int max = 0;
-  for (int i = TORQUE_ARRAY_SIZE - (settings.torqueSensorCutOff / 50); i < TORQUE_ARRAY_SIZE; i++) {  // Select the last T1/50 values (T1 - user defined, 50 - 50ms loop time)
+  for (int i = TORQUE_ARRAY_SIZE - (settings.torqueSensorCutOff); i < TORQUE_ARRAY_SIZE; i++) {  // Select the last T1/50 values (T1 - user defined, 50 - 50ms loop time)
     if (torqueArray[i] > max) {
       max = torqueArray[i];
     }

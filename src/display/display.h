@@ -26,4 +26,6 @@ class Display {
   void updatePower(int power);
 };
 
+extern Display display;
+
 #endif

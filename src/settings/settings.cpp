@@ -24,12 +24,11 @@ void Settings::toggleOption() {
 }
 
 void Settings::changeSetting(int direction) {
-  if (values[cursorPositionCounter] < maxValues[cursorPositionCounter]) {
-    if (cursorPositionCounter == 15) {
-      values[cursorPositionCounter] += 50 * direction;
-    } else {
-      values[cursorPositionCounter] += direction;
-    }
+  if (values[cursorPositionCounter] < maxValues[cursorPositionCounter] && direction == 1) {
+    values[cursorPositionCounter] += direction;
+  }
+  if (values[cursorPositionCounter] > minValues[cursorPositionCounter] && direction == -1) {
+    values[cursorPositionCounter] += direction;
   }
   display.printOption(cursorPositionCounter,
                       names[cursorPositionCounter],
@@ -51,6 +50,13 @@ void Settings::calculateCursorPosition() {
 bool Settings::checkInitialSettings() {
   for (int i = 0; i < MENU_SIZE; i++) {
     if (EEPROM.read(i) > maxValues[i] || EEPROM.read(i) < minValues[i]) {
+      Serial.print("EEPROM value: ");
+      Serial.print(EEPROM.read(i));
+      Serial.print(" is not in range: ");
+      Serial.print(minValues[i]);
+      Serial.print(" - ");
+      Serial.println(maxValues[i]);
+      Serial.println(names[i]);
       return false;
     }
   }
@@ -58,11 +64,17 @@ bool Settings::checkInitialSettings() {
 }
 
 void Settings::loadSettings() {
+  Serial.println("Loading settings");
+  Serial.println(checkInitialSettings());
   if (checkInitialSettings()) {
+    Serial.println("Loading settings from EEPROM");
     for (int i = 0; i < MENU_SIZE; i++) {
       values[i] = EEPROM.read(i);
+      Serial.print(values[i]);
     }
+    Serial.println();
   } else {
+    Serial.println("Loading default settings");
     for (int i = 0; i < MENU_SIZE; i++) {
       values[i] = defaultValues[i];
     }

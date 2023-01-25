@@ -12,9 +12,9 @@
 #define BUFFER_SIZE 12
 #define BUFFER_SIZE_UP 13
 
-#define BUTTON_UP 14
-#define BUTTON_DOWN 13
-#define BUTTON_POWER 12
+#define BUTTON_UP 12
+#define BUTTON_DOWN 14
+#define BUTTON_POWER 27
 #define RX_PIN 16
 #define TX_PIN 17
 
@@ -24,15 +24,15 @@
 int restartCounter = 0;
 
 // init buttons
-OneButton buttonDown(BUTTON_DOWN, true);
 OneButton buttonUp(BUTTON_UP, true);
+OneButton buttonDown(BUTTON_DOWN, true);
 OneButton buttonPower(BUTTON_POWER, true);
 
 // initialize serial port
 HardwareSerial SerialPort(2);
 
-Settings settings;
 Display display;
+Settings settings;
 TorqueSensor torqueSensor;
 Logic logic;
 
@@ -61,23 +61,24 @@ void setup() {
     settings.currentGear = 0;
   }
 
-  // load settings
-  settings.loadSettings();
-  settings.handleLimit();
-  settings.calculatePacket();
-
   // setup serial ports
   Serial.begin(9600);
   SerialPort.begin(9600, SERIAL_8N1, 16, 17);
   setupOTA("OSKD");
 
+  // load settings
+  settings.loadSettings();
+  settings.handleLimit();
+  settings.calculatePacket();
+
   int sum = 0;
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 100; i++) {
     sum += analogRead(VOLTAGE_REFERENCE_PIN);
   }
-  int avg = sum / 10;
+  int avg = sum / 100;
   double voltageReference = (double)avg / 4095 * 3.3;
-  settings.batteryVoltageOffset = 1.8 - voltageReference;
+  settings.batteryVoltageOffset = 1.77 - voltageReference;
+  display.updateGear(settings.currentGear, settings.gearColor);
 }
 
 void loop() {
@@ -114,7 +115,6 @@ void loop() {
   buttonUp.tick();
   buttonDown.tick();
   buttonPower.tick();
-
   ArduinoOTA.handle();
 }
 
@@ -147,7 +147,7 @@ void handleDownButtonClick() {
 }
 void handleUpButtonLongPressStart() {
   if (!settings.settingsMenu) {
-    // toggleLimit();
+    toggleLimit();
   }
 }
 void handleDownButtonLongPressStart() {
@@ -226,14 +226,9 @@ void toggleLimit() {
   EEPROM.commit();
   settings.handleLimit();
 }
-// void toggleTorqueSensor() {
-//   enableTorqueSensor = !enableTorqueSensor;
-//   calculatePacket();
-//   saveToLocal();
-//   EEPROM.writeBool(22, enableTorqueSensor);
-//   EEPROM.commit();
-// }
-
-/*
- * group of functions for dealing with the display
- */
+void toggleTorqueSensor() {
+  settings.enableTorqueSensor = !settings.enableTorqueSensor;
+  settings.calculatePacket();
+  EEPROM.writeBool(22, settings.enableTorqueSensor);
+  EEPROM.commit();
+}

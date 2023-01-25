@@ -20,7 +20,6 @@ class TorqueSensor {
   int torqueArray[TORQUE_ARRAY_SIZE];
   int currentTorque = 0;
   int torqueVoltage = 0;
-  Settings settings;
 
  public:
   TorqueSensor();
@@ -32,5 +31,7 @@ class TorqueSensor {
   int torqueArrayMax();
   int calculateTorqueOutput(int torque);
 };
+
+extern TorqueSensor torqueSensor;
 
 #endif
