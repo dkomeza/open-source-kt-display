@@ -1,5 +1,7 @@
 #include "./torqueSensor.h"
 
+#include "../logic/logic.h"
+
 TorqueSensor::TorqueSensor() {
   populateTorqueArray();
 }

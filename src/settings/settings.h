@@ -42,8 +42,6 @@ class Settings {
   void calculateCursorPosition();
   int calculateUpCRC(byte packet[]);
 
-  Display display;
-
  public:
   Settings() {
     EEPROM.begin(512);
@@ -77,5 +75,7 @@ class Settings {
   void saveSettings();
   void handleLimit();
 };
+
+extern Settings settings;
 
 #endif

@@ -24,7 +24,14 @@ void Settings::toggleOption() {
 }
 
 void Settings::changeSetting(int direction) {
-  if (values[cursorPositionCounter] < maxValues[cursorPositionCounter]) {
+  if (values[cursorPositionCounter] < maxValues[cursorPositionCounter] && direction == 1) {
+    if (cursorPositionCounter == 15) {
+      values[cursorPositionCounter] += 50 * direction;
+    } else {
+      values[cursorPositionCounter] += direction;
+    }
+  }
+  if (values[cursorPositionCounter] > minValues[cursorPositionCounter] && direction == -1) {
     if (cursorPositionCounter == 15) {
       values[cursorPositionCounter] += 50 * direction;
     } else {

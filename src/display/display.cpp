@@ -85,6 +85,7 @@ void Display::updateTorqueIcon(bool enableTorqueSensor) {
 void Display::renderSettingsMenu(int menuSize, const String names[], const int wheelSizeTable[][2], int values[]) {
   tft.fillScreen(TFT_BLACK);
   tft.setTextFont(4);
+  tft.setTextSize(1);
   tft.setTextColor(TFT_WHITE, 0);
   tft.setCursor(16, 16);
   tft.print("settings");
@@ -160,7 +161,11 @@ void Display::printOption(int cursorPositionCounter, String name, int value, int
   }
   tft.print(name);
   tft.print(": ");
-  tft.setTextColor(TFT_YELLOW, 0);
+  if (active) {
+    tft.setTextColor(TFT_YELLOW, 0);
+  } else {
+    tft.setTextColor(TFT_WHITE, 0);
+  }
   if (cursorPositionCounter == 1) {
     int a = wheelSize / 10;
     int b = wheelSize - a * 10;

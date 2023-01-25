@@ -2,6 +2,9 @@
 #define LOGIC_H
 
 #include <Arduino.h>
+
+#include "../settings/settings.h"
+
 #define BUFFER_SIZE 12
 #define BATTERY_INPUT_PIN 33
 
@@ -9,7 +12,7 @@ class Logic {
  private:
   int calculateDownCRC();
   bool shiftArray(int counter);
-  int getBatteryVoltage();
+  double getBatteryVoltage();
 
  public:
   int speed = 0;
@@ -22,5 +25,7 @@ class Logic {
 
   bool processPacket();
 };
+
+extern Logic logic;
 
 #endif

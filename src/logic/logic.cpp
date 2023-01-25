@@ -12,6 +12,7 @@ int Logic::calculateDownCRC() {
 
 bool Logic::processPacket() {
   bool validPacket = shiftArray(0);
+  batteryVoltage = getBatteryVoltage();
   if (!validPacket) return false;
   if (buf[3] + buf[4] <= 0) {
     speed = 0;
@@ -24,7 +25,6 @@ bool Logic::processPacket() {
   } else {
     batteryLevel = buf[1];
   }
-  batteryVoltage = getBatteryVoltage();
   power = buf[8] * 13;
   engineTemp = int8_t(buf[9]) + 15;
   braking = (buf[7] && 32) == 32;
@@ -63,14 +63,14 @@ bool Logic::shiftArray(int counter) {
   }
 }
 
-int Logic::getBatteryVoltage() {
+double Logic::getBatteryVoltage() {
   int sum = 0;
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 100; i++) {
     sum += analogRead(BATTERY_INPUT_PIN);
   }
-  int avg = sum / 10;
+  int avg = sum / 100;
   double voltage = map(avg, 0, 4096, 0, 3300);
-  // voltage += batteryVoltageOffset;
+  voltage += settings.batteryVoltageOffset * 1000;
   double vin = voltage * (1000000000 + 56000000) / 56000000;
   return vin / 100;
 }
