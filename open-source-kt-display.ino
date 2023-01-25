@@ -4,6 +4,7 @@
 
 #include "src/OTA.h"
 #include "src/display/display.h"
+#include "src/logic/logic.h"
 #include "src/settings/settings.h"
 #include "src/torqueSensor/torqueSensor.h"
 
@@ -33,9 +34,6 @@ OneButton buttonPower(BUTTON_POWER, true);
 // initialize serial port
 HardwareSerial SerialPort(2);
 
-// initialize byte arrays for serial communication
-byte buf[BUFFER_SIZE];
-
 // initialize variables
 int counter = 0;
 int batteryLevel = 0;
@@ -56,6 +54,7 @@ int torqueArray[TORQUE_ARRAY_SIZE];
 Settings settings;
 Display display;
 TorqueSensor torqueSensor;
+Logic logic;
 
 void setup() {
   // init display
@@ -106,8 +105,8 @@ void loop() {
   long time = millis();
 
   int SerialAvailableBits = SerialPort.available();
-  if (SerialAvailableBits >= BUFFER_SIZE) {  // check if there are enough available bytes to read
-    SerialPort.readBytes(buf, BUFFER_SIZE);  // read bytes to the buf array
+  if (SerialAvailableBits >= BUFFER_SIZE) {        // check if there are enough available bytes to read
+    SerialPort.readBytes(logic.buf, BUFFER_SIZE);  // read bytes to the buf array
   } else {
     if (counter > 50) {
       SerialPort.begin(9600, SERIAL_8N1, 16, 17);
@@ -115,17 +114,15 @@ void loop() {
     }
     counter++;
   }
-  bool validPacket = shiftArray(0);
 
-  processPacket();  // process packet from the controller
-  getBatteryVoltage();
-  if (settings.settingsMenu) {  // render settings menu
+  bool validPacket = logic.processPacket();  // process the packet
+  if (settings.settingsMenu) {               // render settings menu
     if (millis() - time < 50) {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
     }
   } else {
     // if (validPacket) {       // if the packet is valid render the display, otherwise skip the render
-    display.render(batteryLevel, batteryVoltage, speed, engineTemp, controllerTemp, power);
+    display.render(logic.batteryLevel, logic.batteryVoltage, logic.speed, logic.engineTemp, 0, logic.power);
     // }
     if (millis() - time < 50) {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
@@ -187,7 +184,7 @@ void handlePowerButtonClick() {
     settings.toggleOption();
   } else {
     settings.enableTorqueSensor = !settings.enableTorqueSensor
-    settings.calculatePacket();
+                                       settings.calculatePacket();
     display.updateTorqueIcon(settigns.enableTorqueSensor);
     EEPROM.writeBool(22, enableTorqueSensor);
     EEPROM.commit();
@@ -259,80 +256,7 @@ void stopWalkMode() {
 /*
  * group of functions for dealing with the display
  */
-// calculating the crc value for the packet to be sent to the controller
-int calculateUpCRC(byte packet[]) {
-  int crc = 0;
-  for (int i = 0; i < BUFFER_SIZE_UP; i++) {
-    if (i != 5) {
-      crc ^= packet[i];
-    }
-  }
-  crc ^= 3;
-  return crc;
-}
-// calculating the crc value for the packet received from the controller
-int calculateDownCRC() {
-  int crc = 0;
-  for (int i = 0; i < BUFFER_SIZE; i++) {
-    if (i != 6 && i != 0) {
-      crc ^= buf[i];
-    }
-  }
-  return crc;
-}
-// getting readables values from the packet
-void processPacket() {
-  if (buf[3] + buf[4] <= 0) {
-    speed = 0;
-  } else {
-    speed = round(60000 / (buf[3] * 256 + buf[4]) * 0.1885 * 0.66 * 10);
-  }
 
-  if (buf[1] > 16) {
-    batteryLevel = 16;
-  } else {
-    batteryLevel = buf[1];
-  }
-  power = buf[8] * 13;
-  engineTemp = int8_t(buf[9]) + 15;
-  if ((buf[7] && 32) == 32) {
-    settings.gearColor = 2;
-  } else {
-    settings.gearColor = settings.limitState ? 0 : 1;
-  }
-}
-// function for shifting the packet in case of a bit loss
-bool shiftArray(int counter) {
-  int crc = calculateDownCRC();
-  if (counter == 5) {
-    return false;
-  }
-  if (buf[0] != 65 || buf[6] != crc) {
-    byte newBuf[BUFFER_SIZE];
-    int shift = 0;
-    for (int i = 1; i < BUFFER_SIZE; i++) {
-      if (buf[i] == 65) {
-        shift = i;
-      }
-    }
-    shift = BUFFER_SIZE - shift;
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-      if (i < shift) {
-        newBuf[i] = buf[BUFFER_SIZE + i - shift];
-      } else {
-        newBuf[i] = buf[i - shift];
-      }
-    }
-    memcpy(buf, newBuf, sizeof(newBuf));
-    crc = calculateDownCRC();
-    if (buf[0] != 65 || buf[6] != crc) {
-      int currentCounter = counter + 1;
-      shiftArray(currentCounter);
-    } else {
-      return true;
-    }
-  }
-}
 // function to handle "legal mode"
 void handleLimit() {
   if (settings.limitState) {
@@ -351,18 +275,4 @@ void handleLimit() {
     settings.calculatePacket();
     display.updateGear(settings.currentGear, settings.gearColor);
   }
-}
-// function to get battery voltage
-void getBatteryVoltage() {
-  int sum = 0;
-  for (int i = 0; i < 10; i++) {
-    sum += analogRead(BATTERY_INPUT_PIN);
-  }
-  int avg = sum / 10;
-  double voltage = map(avg, 0, 4096, 0, 3300);
-  // voltage += batteryVoltageOffset;
-  double vin = voltage * (1000000000 + 56000000) / 56000000;
-  // double vin = voltage / 0.04852521;
-  // vin *= 10;
-  batteryVoltage = vin / 100;
 }
