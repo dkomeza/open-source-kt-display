@@ -1,7 +1,6 @@
 #include "./logic.h"
 
-// calculating the crc value for the packet received from the controller
-int Logis::calculateDownCRC() {
+int Logic::calculateDownCRC() {
   int crc = 0;
   for (int i = 0; i < BUFFER_SIZE; i++) {
     if (i != 6 && i != 0) {
@@ -10,8 +9,10 @@ int Logis::calculateDownCRC() {
   }
   return crc;
 }
-// getting readables values from the packet
-void Logis::processPacket() {
+
+bool Logic::processPacket() {
+  bool validPacket = shiftArray(0);
+  if (!validPacket) return false;
   if (buf[3] + buf[4] <= 0) {
     speed = 0;
   } else {
@@ -23,16 +24,14 @@ void Logis::processPacket() {
   } else {
     batteryLevel = buf[1];
   }
+  batteryVoltage = getBatteryVoltage();
   power = buf[8] * 13;
   engineTemp = int8_t(buf[9]) + 15;
-  if ((buf[7] && 32) == 32) {
-    settings.gearColor = 2;
-  } else {
-    settings.gearColor = settings.limitState ? 0 : 1;
-  }
+  braking = (buf[7] && 32) == 32;
+  return true;
 }
-// function for shifting the packet in case of a bit loss
-bool Logis::shiftArray(int counter) {
+
+bool Logic::shiftArray(int counter) {
   int crc = calculateDownCRC();
   if (counter == 5) {
     return false;
@@ -62,4 +61,16 @@ bool Logis::shiftArray(int counter) {
       return true;
     }
   }
+}
+
+int Logic::getBatteryVoltage() {
+  int sum = 0;
+  for (int i = 0; i < 10; i++) {
+    sum += analogRead(BATTERY_INPUT_PIN);
+  }
+  int avg = sum / 10;
+  double voltage = map(avg, 0, 4096, 0, 3300);
+  // voltage += batteryVoltageOffset;
+  double vin = voltage * (1000000000 + 56000000) / 56000000;
+  return vin / 100;
 }
