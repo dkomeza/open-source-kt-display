@@ -4,6 +4,7 @@
 
 #include "src/OTA.h"
 #include "src/display/display.h"
+#include "src/logic/logic.h"
 #include "src/settings/settings.h"
 #include "src/torqueSensor/torqueSensor.h"
 
@@ -33,9 +34,6 @@ OneButton buttonPower(BUTTON_POWER, true);
 // initialize serial port
 HardwareSerial SerialPort(2);
 
-// initialize byte arrays for serial communication
-byte buf[BUFFER_SIZE];
-
 // initialize variables
 int counter = 0;
 int batteryLevel = 0;
@@ -56,6 +54,7 @@ int torqueArray[TORQUE_ARRAY_SIZE];
 Settings settings;
 Display display;
 TorqueSensor torqueSensor;
+Logic logic;
 
 void setup() {
   // init display
@@ -106,8 +105,8 @@ void loop() {
   long time = millis();
 
   int SerialAvailableBits = SerialPort.available();
-  if (SerialAvailableBits >= BUFFER_SIZE) {  // check if there are enough available bytes to read
-    SerialPort.readBytes(buf, BUFFER_SIZE);  // read bytes to the buf array
+  if (SerialAvailableBits >= BUFFER_SIZE) {        // check if there are enough available bytes to read
+    SerialPort.readBytes(logic.buf, BUFFER_SIZE);  // read bytes to the buf array
   } else {
     if (counter > 50) {
       SerialPort.begin(9600, SERIAL_8N1, 16, 17);
@@ -115,17 +114,15 @@ void loop() {
     }
     counter++;
   }
-  bool validPacket = shiftArray(0);
 
-  processPacket();  // process packet from the controller
-  getBatteryVoltage();
-  if (settings.settingsMenu) {  // render settings menu
+  bool validPacket = logic.processPacket();  // process the packet
+  if (settings.settingsMenu) {               // render settings menu
     if (millis() - time < 50) {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
     }
   } else {
     // if (validPacket) {       // if the packet is valid render the display, otherwise skip the render
-    display.render(batteryLevel, batteryVoltage, speed, engineTemp, controllerTemp, power);
+    display.render(logic.batteryLevel, logic.batteryVoltage, logic.speed, logic.engineTemp, 0, logic.power);
     // }
     if (millis() - time < 50) {
       delay(50 - (millis() - time));  // delay to make the loop run at a constant rate
@@ -187,7 +184,7 @@ void handlePowerButtonClick() {
     settings.toggleOption();
   } else {
     settings.enableTorqueSensor = !settings.enableTorqueSensor
-    settings.calculatePacket();
+                                       settings.calculatePacket();
     display.updateTorqueIcon(settigns.enableTorqueSensor);
     EEPROM.writeBool(22, enableTorqueSensor);
     EEPROM.commit();
@@ -278,18 +275,4 @@ void handleLimit() {
     settings.calculatePacket();
     display.updateGear(settings.currentGear, settings.gearColor);
   }
-}
-// function to get battery voltage
-void getBatteryVoltage() {
-  int sum = 0;
-  for (int i = 0; i < 10; i++) {
-    sum += analogRead(BATTERY_INPUT_PIN);
-  }
-  int avg = sum / 10;
-  double voltage = map(avg, 0, 4096, 0, 3300);
-  // voltage += batteryVoltageOffset;
-  double vin = voltage * (1000000000 + 56000000) / 56000000;
-  // double vin = voltage / 0.04852521;
-  // vin *= 10;
-  batteryVoltage = vin / 100;
 }
