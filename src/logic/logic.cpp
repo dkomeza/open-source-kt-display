@@ -1,5 +1,9 @@
 #include "./logic.h"
 
+/**
+ * Calculate the CRC checksum of a packet
+ * @return the CRC checksum
+ */
 int Logic::calculateDownCRC() {
   int crc = 0;
   for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -10,10 +14,17 @@ int Logic::calculateDownCRC() {
   return crc;
 }
 
+/**
+ * The main loop of the logic
+ * Saves the data from the buffer to the variables
+ * [batteryLevel, batteryVoltage, speed, engineTemp, power]
+ * @return bool true if the data is valid, false if not
+ */
 bool Logic::processPacket() {
   bool validPacket = shiftArray(0);
   batteryVoltage = getBatteryVoltage();
-  if (!validPacket) return false;
+  if (!validPacket)
+    return false;
   if (buf[3] + buf[4] <= 0) {
     speed = 0;
   } else {
@@ -31,6 +42,11 @@ bool Logic::processPacket() {
   return true;
 }
 
+/**
+ * Shift the array to the left
+ * @param counter the counter for the recursion (max 5 times) always use 0
+ * @return bool true if the data is valid, false if not
+ */
 bool Logic::shiftArray(int counter) {
   int crc = calculateDownCRC();
   if (counter == 5) {
@@ -63,6 +79,10 @@ bool Logic::shiftArray(int counter) {
   }
 }
 
+/**
+ * Get the battery voltage from the voltage divider
+ * @return double the battery voltage
+ */
 double Logic::getBatteryVoltage() {
   int sum = 0;
   for (int i = 0; i < 100; i++) {
