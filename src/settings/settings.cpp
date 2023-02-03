@@ -120,8 +120,8 @@ void Settings::calculatePacket() {
   } else {
     speed = SPEED_LIMIT;
   }
-  int P_4 = enableTorqueSensor ? 1 : P4;
-  int C_4 = enableTorqueSensor ? 0 : C4;
+  int P_4 = enableTorqueSensor ? 0 : P4;
+  int C_4 = enableTorqueSensor ? 4 : C4;
   settings[0] = P5;
   settings[1] = enableTorqueSensor ? 0 : currentGear;
   settings[2] =
