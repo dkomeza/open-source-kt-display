@@ -43,9 +43,6 @@ class Settings {
   int calculateUpCRC(byte packet[]);
 
  public:
-  Settings() {
-    EEPROM.begin(512);
-  }
   bool settingsMenu = false;
   int cursorPositionCounter = 0;
   bool selectedOption = false;
