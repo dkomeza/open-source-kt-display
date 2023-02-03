@@ -38,7 +38,7 @@ bool Logic::processPacket() {
   }
   power = buf[8] * 13;
   engineTemp = int8_t(buf[9]) + 15;
-  braking = (buf[7] && 32) == 32;
+  braking = (buf[7] & 32) == 32;
   return true;
 }
 
