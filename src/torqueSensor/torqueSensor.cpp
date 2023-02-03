@@ -1,7 +1,4 @@
 #include "./torqueSensor.h"
-
-#include "../logic/logic.h"
-
 /**
  * Initialize the torque sensor and fill the torque table with 0
  * @return void

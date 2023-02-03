@@ -195,7 +195,7 @@ void Display::updateBattery(int bars, int batteryVoltage) {
   tft.drawRoundRect(10, 16, 80, 24, 4, TFT_GREEN);
   tft.fillRect(90, 23, 3, 10, TFT_GREEN);
   tft.fillRoundRect(92, 23, 3, 10, 2, TFT_GREEN);
-  for (int i = 0; i < bars; i++) {
+  for (int i = 0; i < bars / 4; i++) {
     int x = i * 19 + 13;
     tft.fillRoundRect(x, 19, 17, 18, 2, TFT_GREEN);
   }

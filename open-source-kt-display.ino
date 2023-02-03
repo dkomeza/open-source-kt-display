@@ -79,6 +79,8 @@ void setup() {
   double voltageReference = (double)avg / 4095 * 3.3;
   settings.batteryVoltageOffset = 1.77 - voltageReference;
   display.updateGear(settings.currentGear, settings.gearColor);
+
+  dacWrite(TORQUE_OUTPUT_PIN, 128);
 }
 
 void loop() {
