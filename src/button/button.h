@@ -5,7 +5,7 @@
 typedef void (*callbackFunction)(void);
 
 class Button {
-public:
+ public:
   Button();
   Button(const int pin);
 
@@ -17,15 +17,15 @@ public:
 
   void update();
 
-private:
+ private:
   int _pin;
   bool _isPressed;
   unsigned long _lastChange;
   int _clicks;
 
   unsigned int _debounceTime = 50;
-  unsigned int _clickTime = 400;
-  unsigned int _pressTime = 1000;
+  unsigned int _clickTime = 200;
+  unsigned int _pressTime = 600;
 
   callbackFunction _onClick = NULL;
   callbackFunction _onDoubleClick = NULL;
@@ -40,7 +40,7 @@ private:
     COUNT = 3,
     PRESS = 4,
     PRESSEND = 5,
-  }
+  };
 
   void tick(bool isPressed);
   void newState(ButtonState nextState);

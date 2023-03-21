@@ -191,13 +191,23 @@ void Display::printOption(int cursorPositionCounter, String name, int value, int
  * @return void
  */
 void Display::updateBattery(int bars, int batteryVoltage) {
-  tft.fillRect(10, 16, 100, 25, TFT_BLACK);
-  tft.drawRoundRect(10, 16, 80, 24, 4, TFT_GREEN);
-  tft.fillRect(90, 23, 3, 10, TFT_GREEN);
-  tft.fillRoundRect(92, 23, 3, 10, 2, TFT_GREEN);
-  for (int i = 0; i < bars / 4; i++) {
-    int x = i * 19 + 13;
-    tft.fillRoundRect(x, 19, 17, 18, 2, TFT_GREEN);
+  int _bars = bars / 4;
+  if (_bars > 4) {
+    _bars = 4;
+  }
+  if (_bars < 0) {
+    _bars = 0;
+  }
+  if (previousBatteryLevel != _bars) {
+    previousBatteryLevel = _bars;
+    tft.fillRect(10, 16, 100, 25, TFT_BLACK);
+    tft.drawRoundRect(10, 16, 80, 24, 4, TFT_GREEN);
+    tft.fillRect(90, 23, 3, 10, TFT_GREEN);
+    tft.fillRoundRect(92, 23, 3, 10, 2, TFT_GREEN);
+    for (int i = 0; i < _bars; i++) {
+      int x = i * 19 + 13;
+      tft.fillRoundRect(x, 19, 17, 18, 2, TFT_GREEN);
+    }
   }
   tft.setCursor(164, 16);
   tft.setTextColor(TFT_GREEN, 0);

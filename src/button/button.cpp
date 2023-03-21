@@ -4,7 +4,7 @@ Button::Button() { _pin = -1; }
 
 Button::Button(const int pin) {
   _pin = pin;
-  pinMode(pin, true);
+  pinMode(pin, INPUT_PULLUP);
 }
 
 void Button::onClick(callbackFunction function) { _onClick = function; }
@@ -30,69 +30,69 @@ void Button::tick(bool isPressed) {
   unsigned long now = millis();
   unsigned long elapsed = now - _lastChange;
   switch (_state) {
-  case INIT:
-    if (isPressed) {
-      newState(DOWN);
-      _lastChange = now;
-      _clicks = 0;
-    }
-    break;
-  case DOWN:
-    if ((!isPressed) && (elapsed < _debounceTime)) {
-      newState(_lastState);
-    } else if (!isPressed) {
-      newState(UP);
-      _lastChange = now;
-    } else if ((isPressed) && (elapsed > _pressTime)) {
-      if (_onLongPressStart)
-        _onLongPressStart();
-      newState(UP);
-    }
-    break;
-  case UP:
-    if ((isPressed) && (elapsed < _debounceTime)) {
-      newState(_lastState);
-    } else if (elapsed >= _debounceTime) {
-      _clicks++;
-      newState(COUNT);
-    }
-    break;
-  case COUNT:
-    if (isPressed) {
-      newState(DOWN);
-      _lastChange = now;
-    } else if ((elapsed > _clickTime) || (_clicks == 2)) {
-      if (_clicks == 1) {
-        if (_onClick)
-          _onClick();
-      } else {
-        if (_onDoubleClick)
-          _onDoubleClick();
+    case INIT:
+      if (isPressed) {
+        newState(DOWN);
+        _lastChange = now;
+        _clicks = 0;
       }
-      reset();
-    }
-    break;
+      break;
+    case DOWN:
+      if ((!isPressed) && (elapsed < _debounceTime)) {
+        newState(_lastState);
+      } else if (!isPressed) {
+        newState(UP);
+        _lastChange = now;
+      } else if ((isPressed) && (elapsed > _pressTime)) {
+        if (_onLongPressStart)
+          _onLongPressStart();
+        newState(PRESS);
+      }
+      break;
+    case UP:
+      if ((isPressed) && (elapsed < _debounceTime)) {
+        newState(_lastState);
+      } else if (elapsed >= _debounceTime) {
+        _clicks++;
+        newState(COUNT);
+      }
+      break;
+    case COUNT:
+      if (isPressed) {
+        newState(DOWN);
+        _lastChange = now;
+      } else if ((elapsed > _clickTime) || (_clicks == 2)) {
+        if (_clicks == 1) {
+          if (_onClick)
+            _onClick();
+        } else {
+          if (_onDoubleClick)
+            _onDoubleClick();
+        }
+        reset();
+      }
+      break;
 
-  case PRESS:
-    if (!isPressed) {
-      newState(PRESSEND);
-      _lastChange = now;
-    }
-    break;
+    case PRESS:
+      if (!isPressed) {
+        newState(PRESSEND);
+        _lastChange = now;
+      }
+      break;
 
-  case PRESSEND:
-    if ((isPressed) && (elapsed < _debounceTime)) {
-      newState(_lastState);
-    } else if (elapsed >= _debounceTime) {
-      if (_onLongPressStop)
-        _onLongPressStop();
-      reset();
-    }
-    break;
+    case PRESSEND:
+      if ((isPressed) && (elapsed < _debounceTime)) {
+        newState(_lastState);
+      } else if (elapsed >= _debounceTime) {
+        if (_onLongPressStop)
+          _onLongPressStop();
+        reset();
+      }
+      break;
 
-  default:
-    newState(INIT);
-    break;
+    default:
+      newState(INIT);
+      break;
   }
 }
 

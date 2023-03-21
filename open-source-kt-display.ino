@@ -12,8 +12,8 @@
 #define BUFFER_SIZE 12
 #define BUFFER_SIZE_UP 13
 
-#define BUTTON_UP 12
-#define BUTTON_DOWN 14
+#define BUTTON_UP 14
+#define BUTTON_DOWN 12
 #define BUTTON_POWER 27
 #define RX_PIN 16
 #define TX_PIN 17
@@ -88,8 +88,8 @@ void loop() {
 
   int SerialAvailableBits = SerialPort.available();
   if (SerialAvailableBits >=
-      BUFFER_SIZE) { // check if there are enough available bytes to read
-    SerialPort.readBytes(logic.buf, BUFFER_SIZE); // read bytes to the buf array
+      BUFFER_SIZE) {                               // check if there are enough available bytes to read
+    SerialPort.readBytes(logic.buf, BUFFER_SIZE);  // read bytes to the buf array
   } else {
     if (restartCounter > 50) {
       SerialPort.begin(9600, SERIAL_8N1, 16, 17);
@@ -98,31 +98,31 @@ void loop() {
     restartCounter++;
   }
 
-  bool validPacket = logic.processPacket(); // process the packet
-  if (settings.settingsMenu) {              // render settings menu
+  bool validPacket = logic.processPacket();  // process the packet
+  if (settings.settingsMenu) {               // render settings menu
     if (millis() - time < 50) {
       delay(50 -
-            (millis() - time)); // delay to make the loop run at a constant rate
+            (millis() - time));  // delay to make the loop run at a constant rate
     }
   } else {
-    // if (validPacket) {       // if the packet is valid render the display,
-    // otherwise skip the render
-    display.render(logic.batteryLevel, logic.batteryVoltage, logic.speed,
-                   logic.engineTemp, 0, logic.power);
-    // }
+    if (validPacket) {  // if the packet is valid render the display,
+      // otherwise skip the render
+      display.render(logic.batteryLevel, logic.batteryVoltage, logic.speed,
+                     logic.engineTemp, 0, logic.power);
+    }
     if (millis() - time < 50) {
       delay(50 -
-            (millis() - time)); // delay to make the loop run at a constant rate
+            (millis() - time));  // delay to make the loop run at a constant rate
     }
   }
   SerialPort.write(settings.settings,
-                   BUFFER_SIZE_UP); // send packet to the controller
+                   BUFFER_SIZE_UP);  // send packet to the controller
 
   torqueSensor.handleTorqueSensor();
 
-  buttonUp.tick();
-  buttonDown.tick();
-  buttonPower.tick();
+  buttonUp.update();
+  buttonDown.update();
+  buttonPower.update();
   ArduinoOTA.handle();
 }
 
