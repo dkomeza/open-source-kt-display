@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,react,c++,c
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,react,c++,c
 
+.vscode/
+
 ### C ###
 # Prerequisites
 *.d

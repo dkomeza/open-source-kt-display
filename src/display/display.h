@@ -20,6 +20,7 @@ class Display {
 
  private:
   TFT_eSPI tft = TFT_eSPI(240, 320);
+  int previousBatteryLevel = 0;
   void updateBattery(int batteryLevel, int batteryVoltage);
   void updateSpeed(int speed);
   void updateEngineTemp(int engineTemp);
