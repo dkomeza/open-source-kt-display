@@ -56,11 +56,9 @@ int currentState = 0;
 
 void setup() {
   pinMode(13, OUTPUT);
-  digitalWrite(13, currentState);
 
   // init display
-  display.init();
-  
+  display.init();  
 
   // initialize eeprom
   EEPROM.begin(EEPROM_SIZE);
@@ -107,7 +105,8 @@ void setup() {
   settings.batteryVoltageOffset = 1.77 - voltageReference;
   display.updateGear(settings.currentGear, settings.gearColor);
 
-  dacWrite(TORQUE_OUTPUT_PIN, 128);
+  // init sleep mode
+  esp_sleep_enable_ext0_wakeup((gpio_num_t)BUTTON_POWER, 0);
 }
 
 void loop() {
@@ -227,6 +226,9 @@ void handlePowerButtonLongPressStart() {
 void handlePowerButtonDoubleClick() {
   currentState = 1 - currentState;
   digitalWrite(13, currentState);
+  if (currentState == 0) {
+    esp_deep_sleep_start();
+  }
 }
 
 /*
