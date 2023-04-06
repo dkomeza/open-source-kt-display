@@ -10,6 +10,12 @@ void Display::init() {
   initialRender();
 }
 
+void Display::renderIP(IPAddress IP) {
+  tft.fillScreen(TFT_BLACK);
+  tft.setCursor(40, 40);
+  tft.print(IP);
+}
+
 /**
  * Render the initial display
  * @return void

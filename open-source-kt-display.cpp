@@ -36,10 +36,31 @@ Settings settings;
 TorqueSensor torqueSensor;
 Logic logic;
 
+void handleUpButtonClick();
+void handleDownButtonClick();
+void handleUpButtonLongPressStart();
+void handleDownButtonLongPressStart();
+void handleDownButtonLongPressStop();
+void handlePowerButtonClick();
+void handlePowerButtonLongPressStart();
+void handlePowerButtonDoubleClick();
+
+void increaseGear();
+void decreaseGear();
+void startWalkMode();
+void stopWalkMode();
+void toggleLimit();
+void toggleTorqueSensor();
+
+int currentState = 0;
+
 void setup() {
+  pinMode(13, OUTPUT);
+  digitalWrite(13, currentState);
+
   // init display
   display.init();
-  display.initialRender();
+  
 
   // initialize eeprom
   EEPROM.begin(EEPROM_SIZE);
@@ -52,6 +73,7 @@ void setup() {
   buttonDown.onLongPressStop(handleDownButtonLongPressStop);
   buttonPower.onClick(handlePowerButtonClick);
   buttonPower.onLongPressStart(handlePowerButtonLongPressStart);
+  buttonPower.onDoubleClick(handlePowerButtonDoubleClick);
 
   // get data from eeprom
   settings.limitState = EEPROM.readBool(20);
@@ -64,12 +86,17 @@ void setup() {
   // setup serial ports
   Serial.begin(9600);
   SerialPort.begin(9600, SERIAL_8N1, 16, 17);
-  setupOTA("OSKD");
+  IPAddress IP = setupOTA("OSKD");
+
+  display.renderIP(IP);
+  delay(5000);
+  display.initialRender();
 
   // load settings
   settings.loadSettings();
   settings.handleLimit();
   settings.calculatePacket();
+
 
   int sum = 0;
   for (int i = 0; i < 100; i++) {
@@ -196,6 +223,10 @@ void handlePowerButtonLongPressStart() {
       display.updateGear(settings.currentGear, settings.gearColor);
     }
   }
+}
+void handlePowerButtonDoubleClick() {
+  currentState = 1 - currentState;
+  digitalWrite(13, currentState);
 }
 
 /*

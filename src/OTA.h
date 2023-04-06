@@ -6,15 +6,8 @@
 
 #include "credentials.h"
 
-void setupOTA(const char* nameprefix) {
-  // Configure the hostname
-  uint16_t maxlen = strlen(nameprefix) + 7;
-  char* fullhostname = new char[maxlen];
-  uint8_t mac[6];
-  WiFi.macAddress(mac);
-  snprintf(fullhostname, maxlen, "%s-%02x%02x%02x", nameprefix, mac[3], mac[4], mac[5]);
-  ArduinoOTA.setHostname(fullhostname);
-  delete[] fullhostname;
+IPAddress setupOTA(const char* nameprefix) {
+  ArduinoOTA.setHostname(nameprefix);
 
   // Configure and start the WiFi station
   WiFi.mode(WIFI_STA);
@@ -59,4 +52,5 @@ void setupOTA(const char* nameprefix) {
   Serial.println("OTA Initialized");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  return WiFi.localIP();
 }
