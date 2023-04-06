@@ -1,8 +1,0 @@
-{
-    "sketch": "open-source-kt-display.ino",
-    "configuration": "FlashFreq=80,UploadSpeed=115200,DebugLevel=none,EraseFlash=none",
-    "board": "esp32:esp32:esp32doit-devkit-v1",
-    "port": "192.168.55.112",
-    "programmer": "esptool",
-    "output": "../build"
-}
