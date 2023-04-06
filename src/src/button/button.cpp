@@ -26,6 +26,10 @@ void Button::update() {
   }
 }
 
+bool Button::isPressed() {
+  return _state == DOWN;
+}
+
 void Button::tick(bool isPressed) {
   unsigned long now = millis();
   unsigned long elapsed = now - _lastChange;

@@ -16,6 +16,7 @@ class Button {
   void onLongPressStop(callbackFunction function);
 
   void update();
+  bool isPressed();
 
  private:
   int _pin;

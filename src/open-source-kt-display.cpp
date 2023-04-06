@@ -55,10 +55,28 @@ void toggleTorqueSensor();
 int currentState = 0;
 
 void setup() {
+  pinMode(5, OUTPUT);
+  digitalWrite(5, LOW);
+  // init sleep mode
+  esp_sleep_enable_ext0_wakeup((gpio_num_t)BUTTON_POWER, 0);
   pinMode(13, OUTPUT);
 
-  // init display
-  display.init();  
+  
+
+  // check for the long press on power button on startup
+  if (digitalRead(BUTTON_POWER) == LOW) {
+    delay(1000);
+    if (digitalRead(BUTTON_POWER) == LOW) {
+      digitalWrite(5, HIGH);
+    } else {
+      esp_deep_sleep_start();
+    }
+  } else {
+    esp_deep_sleep_start();
+  }
+
+   // init display
+  display.init(); 
 
   // initialize eeprom
   EEPROM.begin(EEPROM_SIZE);
@@ -104,9 +122,6 @@ void setup() {
   double voltageReference = (double)avg / 4095 * 3.3;
   settings.batteryVoltageOffset = 1.77 - voltageReference;
   display.updateGear(settings.currentGear, settings.gearColor);
-
-  // init sleep mode
-  esp_sleep_enable_ext0_wakeup((gpio_num_t)BUTTON_POWER, 0);
 }
 
 void loop() {
@@ -207,6 +222,13 @@ void handlePowerButtonClick() {
   }
 }
 void handlePowerButtonLongPressStart() {
+  currentState = 1 - currentState;
+  digitalWrite(13, currentState);
+  if (currentState == 0) {
+    esp_deep_sleep_start();
+  }
+}
+void handlePowerButtonDoubleClick() {
   if (!settings.settingsMenu) {
     settings.renderSettingsMenu();
     settings.settingsMenu = !settings.settingsMenu;
@@ -221,13 +243,6 @@ void handlePowerButtonLongPressStart() {
                      logic.engineTemp, 0, logic.power);
       display.updateGear(settings.currentGear, settings.gearColor);
     }
-  }
-}
-void handlePowerButtonDoubleClick() {
-  currentState = 1 - currentState;
-  digitalWrite(13, currentState);
-  if (currentState == 0) {
-    esp_deep_sleep_start();
   }
 }
 
