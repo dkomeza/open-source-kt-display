@@ -11,6 +11,7 @@ class Display {
   }
   void init();
   void initialRender();
+  void clearScreen();
   void renderIP(IPAddress IP);
   void render(int batteryLevel, int batteryVoltage, int speed, int engineTemp, int controllerTemp, int power);
   void updateGear(int currentGear, int gearColor);

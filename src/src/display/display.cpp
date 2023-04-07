@@ -30,6 +30,10 @@ void Display::initialRender() {
   tft.drawFastHLine(0, 248, 240, TFT_WHITE);
 }
 
+void Display::clearScreen() {
+  tft.fillScreen(TFT_GOLD);
+}
+
 /**
  * Render the display
  * @param batteryLevel the battery level to draw (0-4)

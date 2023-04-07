@@ -67,6 +67,8 @@ void setup() {
   if (digitalRead(BUTTON_POWER) == LOW) {
     delay(1000);
     if (digitalRead(BUTTON_POWER) == LOW) {
+      // init display
+      display.init(); 
       digitalWrite(5, HIGH);
     } else {
       esp_deep_sleep_start();
@@ -75,8 +77,7 @@ void setup() {
     esp_deep_sleep_start();
   }
 
-   // init display
-  display.init(); 
+   
 
   // initialize eeprom
   EEPROM.begin(EEPROM_SIZE);
@@ -105,7 +106,7 @@ void setup() {
   IPAddress IP = setupOTA("OSKD");
 
   display.renderIP(IP);
-  delay(5000);
+  delay(1000);
   display.initialRender();
 
   // load settings
@@ -120,8 +121,9 @@ void setup() {
   }
   int avg = sum / 100;
   double voltageReference = (double)avg / 4095 * 3.3;
-  settings.batteryVoltageOffset = 1.77 - voltageReference;
+  settings.batteryVoltageOffset = 1.8 - voltageReference;
   display.updateGear(settings.currentGear, settings.gearColor);
+  handlePowerButtonLongPressStart();
 }
 
 void loop() {
@@ -225,6 +227,8 @@ void handlePowerButtonLongPressStart() {
   currentState = 1 - currentState;
   digitalWrite(13, currentState);
   if (currentState == 0) {
+    display.initialRender();
+    digitalWrite(5, LOW);
     esp_deep_sleep_start();
   }
 }
