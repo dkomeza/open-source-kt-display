@@ -6,7 +6,7 @@
 
 #include "../display/display.h"
 
-#define MENU_SIZE 17
+#define MENU_SIZE 18
 #define BUFFER_SIZE 12
 #define BUFFER_SIZE_UP 13
 
@@ -29,11 +29,11 @@
 
 class Settings {
  private:
-  const String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14", "T1", "T2"};
+  const String names[MENU_SIZE] = {"Speed limit", "Wheel size", "P1", "P2", "P3", "P4", "P5", "C1", "C2", "C4", "C5", "C11", "C12", "C13", "C14", "T1", "T2", "D1"};
   int values[MENU_SIZE];
-  const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -100};
-  const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 7, 4, 10, 3, 7, 5, 3, 40, 100};
-  const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1, 10, 0};
+  const int minValues[MENU_SIZE] = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, -100, 1};
+  const int maxValues[MENU_SIZE] = {72, 14, 255, 6, 1, 1, 30, 7, 7, 4, 10, 3, 7, 5, 3, 40, 100, 9};
+  const int defaultValues[MENU_SIZE] = {72, 12, 86, 1, 1, 0, 13, 5, 0, 0, 10, 0, 4, 0, 1, 10, 0, 5};
   const int wheelSizeTable[15][2] = {{50, 22}, {60, 18}, {80, 10}, {100, 14}, {120, 2}, {140, 6}, {160, 0}, {180, 4}, {200, 8}, {230, 12}, {240, 16}, {260, 20}, {275, 24}, {280, 28}, {290, 30}};  // {wheel size * 10, byte value}
 
   int cursorPosition[2] = {102, 80};
