@@ -61,6 +61,7 @@ class Settings {
   int maxGear = 5;
 
   int torqueSensorCutOff = values[15];
+  int* shutdownDelay = &values[17];
 
   void renderSettingsMenu();
   void updateCursorPosition();

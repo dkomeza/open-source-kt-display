@@ -89,7 +89,6 @@ void Settings::loadSettings() {
   if (checkInitialSettings()) {
     for (int i = 0; i < MENU_SIZE; i++) {
       values[i] = EEPROM.read(i);
-      Serial.print(values[i]);
     }
   } else {
     for (int i = 0; i < MENU_SIZE; i++) {

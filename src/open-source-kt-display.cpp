@@ -54,6 +54,8 @@ void toggleTorqueSensor();
 
 int currentState = 0;
 
+long long lastTime = 0;
+
 void setup() {
   pinMode(5, OUTPUT);
   digitalWrite(5, LOW);
@@ -65,7 +67,7 @@ void setup() {
 
   // check for the long press on power button on startup
   if (digitalRead(BUTTON_POWER) == LOW) {
-    delay(1000);
+    delay(400);
     if (digitalRead(BUTTON_POWER) == LOW) {
       // init display
       display.init(); 
@@ -124,14 +126,15 @@ void setup() {
   settings.batteryVoltageOffset = 1.8 - voltageReference;
   display.updateGear(settings.currentGear, settings.gearColor);
   handlePowerButtonLongPressStart();
+
+  lastTime = millis() / 1000;
 }
 
 void loop() {
   long time = millis();
 
   int SerialAvailableBits = SerialPort.available();
-  if (SerialAvailableBits >=
-      BUFFER_SIZE) {                               // check if there are enough available bytes to read
+  if (SerialAvailableBits >= BUFFER_SIZE) {                               // check if there are enough available bytes to read
     SerialPort.readBytes(logic.buf, BUFFER_SIZE);  // read bytes to the buf array
   } else {
     if (restartCounter > 50) {
@@ -148,18 +151,26 @@ void loop() {
             (millis() - time));  // delay to make the loop run at a constant rate
     }
   } else {
-    if (validPacket) {  // if the packet is valid render the display,
+    // if (validPacket) {  // if the packet is valid render the display,
       // otherwise skip the render
       display.render(logic.batteryLevel, logic.batteryVoltage, logic.speed,
                      logic.engineTemp, 0, logic.power);
-    }
+      
+      if (logic.speed > 0) {
+        lastTime = millis() / 1000;
+      }
+    // }
     if (millis() - time < 50) {
       delay(50 -
             (millis() - time));  // delay to make the loop run at a constant rate
     }
   }
-  SerialPort.write(settings.settings,
-                   BUFFER_SIZE_UP);  // send packet to the controller
+  SerialPort.write(settings.settings, BUFFER_SIZE_UP);  // send packet to the controller
+
+  if (millis() / 1000 - lastTime > *settings.shutdownDelay * 60) {
+        
+        esp_deep_sleep_start();
+        }
 
   torqueSensor.handleTorqueSensor();
 
