@@ -1,7 +1,7 @@
 #include <EEPROM.h>
 #include <HardwareSerial.h>
 
-#include "src/OTA.h"
+// #include "src/OTA.h"
 #include "src/button/button.h"
 #include "src/display/display.h"
 #include "src/logic/logic.h"
@@ -57,27 +57,27 @@ int currentState = 0;
 long long lastTime = 0;
 
 void setup() {
-  pinMode(5, OUTPUT);
-  digitalWrite(5, LOW);
+  pinMode(26, OUTPUT);
+  dacWrite(26, 255);
   // init sleep mode
   esp_sleep_enable_ext0_wakeup((gpio_num_t)BUTTON_POWER, 0);
   pinMode(13, OUTPUT);
 
   
 
-  // check for the long press on power button on startup
-  if (digitalRead(BUTTON_POWER) == LOW) {
-    delay(400);
-    if (digitalRead(BUTTON_POWER) == LOW) {
-      // init display
-      display.init(); 
-      digitalWrite(5, HIGH);
-    } else {
-      esp_deep_sleep_start();
-    }
-  } else {
-    esp_deep_sleep_start();
-  }
+  // // check for the long press on power button on startup
+  // if (digitalRead(BUTTON_POWER) == LOW) {
+  //   delay(400);
+  //   if (digitalRead(BUTTON_POWER) == LOW) {
+  //     // init display
+  //     display.init(); 
+  //     digitalWrite(5, HIGH);
+  //   } else {
+  //     esp_deep_sleep_start();
+  //   }
+  // } else {
+  //   esp_deep_sleep_start();
+  // }
 
    
 
@@ -103,11 +103,11 @@ void setup() {
   }
 
   // setup serial ports
-  Serial.begin(9600);
+  Serial.begin(115200);
   SerialPort.begin(9600, SERIAL_8N1, 16, 17);
-  IPAddress IP = setupOTA("OSKD");
+  // IPAddress IP = setupOTA("OSKD");
 
-  display.renderIP(IP);
+  // display.renderIP(IP);
   delay(1000);
   display.initialRender();
 
@@ -177,7 +177,7 @@ void loop() {
   buttonUp.update();
   buttonDown.update();
   buttonPower.update();
-  ArduinoOTA.handle();
+  // ArduinoOTA.handle();
 }
 
 /*

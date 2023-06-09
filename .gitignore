@@ -3,6 +3,9 @@
 
 .vscode/
 
+gerbers/
+oskd-backups/
+
 ### C ###
 # Prerequisites
 *.d
