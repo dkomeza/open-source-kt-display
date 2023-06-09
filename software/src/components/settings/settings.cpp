@@ -1,4 +1,4 @@
-#include "settings.h"
+#include "settings.hpp"
 
 #define EEPROM_SIZE 512
 

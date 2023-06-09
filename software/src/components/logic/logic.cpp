@@ -1,4 +1,4 @@
-#include "./logic.h"
+#include "./logic.hpp"
 
 /**
  * Calculate the CRC checksum of a packet

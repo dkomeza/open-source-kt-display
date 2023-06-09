@@ -4,7 +4,7 @@
 #include <WiFiUdp.h>
 #include <Arduino.h>
 
-#include "credentials.h"
+#include "credentials.hpp"
 
 IPAddress setupOTA(const char* nameprefix) {
   ArduinoOTA.setHostname(nameprefix);

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-#include "../display/display.h"
+#include "../display/display.hpp"
 
 #define MENU_SIZE 18
 #define BUFFER_SIZE 12

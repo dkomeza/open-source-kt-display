@@ -6,6 +6,8 @@
 gerbers/
 oskd-backups/
 
+credentials.hpp
+
 ### C ###
 # Prerequisites
 *.d

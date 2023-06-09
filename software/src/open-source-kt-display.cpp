@@ -1,12 +1,12 @@
 #include <EEPROM.h>
 #include <HardwareSerial.h>
 
-// #include "src/OTA.h"
-#include "src/button/button.h"
-#include "src/display/display.h"
-#include "src/logic/logic.h"
-#include "src/settings/settings.h"
-#include "src/torqueSensor/torqueSensor.h"
+#include "components/OTA.hpp"
+#include "components/button/button.hpp"
+#include "components/display/display.hpp"
+#include "components/logic/logic.hpp"
+#include "components/settings/settings.hpp"
+#include "components/torqueSensor/torqueSensor.hpp"
 
 #define EEPROM_SIZE 512
 #define BUFFER_SIZE 12

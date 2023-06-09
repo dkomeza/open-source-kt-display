@@ -12,7 +12,7 @@
 
 #include <Arduino.h>
 
-#include "../settings/settings.h"
+#include "../settings/settings.hpp"
 
 class TorqueSensor {
  private:

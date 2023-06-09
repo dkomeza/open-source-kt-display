@@ -1,4 +1,4 @@
-#include "button.h"
+#include "button.hpp"
 
 Button::Button() { _pin = -1; }
 

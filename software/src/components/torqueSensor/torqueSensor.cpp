@@ -1,4 +1,4 @@
-#include "./torqueSensor.h"
+#include "./torqueSensor.hpp"
 /**
  * Initialize the torque sensor and fill the torque table with 0
  * @return void

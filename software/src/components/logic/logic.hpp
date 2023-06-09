@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#include "../settings/settings.h"
+#include "../settings/settings.hpp"
 
 #define BUFFER_SIZE 12
 #define BATTERY_INPUT_PIN 33
