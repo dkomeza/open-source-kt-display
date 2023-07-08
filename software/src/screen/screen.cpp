@@ -1,6 +1,6 @@
 #include "./screen.h"
 
-Screen::Screen()
+void Screen::setup()
 {
     tft.init();
     tft.setRotation(1);

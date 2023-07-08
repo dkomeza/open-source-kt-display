@@ -5,9 +5,9 @@
 
 enum GEAR_STATE
 {
-    NORMAL,
-    LIMIT,
-    BRAKE
+    NORMAL = 1,
+    LIMIT = 2,
+    BRAKE = 4,
 };
 
 class Data
@@ -22,7 +22,7 @@ public:
     int gear = 0;
     int temperature = 0;
     int power = 0;
-    GEAR_STATE gearState = NORMAL;
+    int gearState = NORMAL;
 
     byte settingsBuffer[BUFFER_SIZE_UP];
 };

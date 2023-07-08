@@ -1,10 +1,10 @@
 #include "./settings.h"
 
-Settings::Settings()
+void Settings::setup()
 {
     EEPROM.begin(EEPROM_SIZE);
 
-    this->loadSettings();
+    loadSettings();
 }
 
 void Settings::loadSettings()
@@ -70,7 +70,7 @@ void Settings::calculatePacket()
 
     settingsBuffer[5] = calculateChecksum(settingsBuffer);
 
-    memcpy(data.settingsBuffer, settingsBuffer, BUFFER_SIZE);
+    memcpy(data.settingsBuffer, settingsBuffer, sizeof(settingsBuffer));
 }
 
 byte Settings::calculateChecksum(byte *buffer)

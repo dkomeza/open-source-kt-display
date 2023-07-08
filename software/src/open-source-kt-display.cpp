@@ -7,18 +7,27 @@
 #include "screen/screen.h"
 #include "settings/settings.h"
 
+Controller controller;
+Data data;
+IO io;
+Screen screen;
+Settings settings;
+
 void setup()
 {
     setupOTA();
 
-    Controller controller;
-    Data data;
-    IO io;
-    Screen screen;
-    Settings settings;
+    controller.setup();
+    screen.setup();
+    io.setup();
+    settings.setup();
 }
 
 void loop()
 {
+    controller.update();
+    screen.update();
+    io.update();
+
     ArduinoOTA.handle();
 }

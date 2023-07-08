@@ -10,7 +10,8 @@
 class Screen
 {
 public:
-    Screen();
+    void setup();
+
     void update();
 
 private:

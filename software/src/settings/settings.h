@@ -51,7 +51,7 @@ private:
     byte calculateChecksum(byte *buffer);
 
 public:
-    Settings();
+    void setup();
 
     byte settingsBuffer[BUFFER_SIZE];
 
