@@ -3,6 +3,6 @@
 
 #include <Arduino.h>
 
-#include "./credentials.h"
+#include "./credentials.h" // ssid and password
 
 #endif // OSKD_OTA_H
