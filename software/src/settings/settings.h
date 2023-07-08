@@ -4,6 +4,8 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
+#include "../data/data.h"
+
 class Settings
 {
 private:

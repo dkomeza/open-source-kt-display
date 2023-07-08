@@ -69,6 +69,8 @@ void Settings::calculatePacket()
     settingsBuffer[12] = 14;
 
     settingsBuffer[5] = calculateChecksum(settingsBuffer);
+
+    memcpy(data.settingsBuffer, settingsBuffer, BUFFER_SIZE);
 }
 
 byte Settings::calculateChecksum(byte *buffer)

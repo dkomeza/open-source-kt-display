@@ -12,6 +12,9 @@ void setup()
     setupOTA();
 
     Controller controller;
+    Data data;
+    IO io;
+    Screen screen;
     Settings settings;
 }
 
