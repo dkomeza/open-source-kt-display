@@ -7,12 +7,15 @@
 #include "screen/screen.h"
 #include "settings/settings.h"
 
-Controller controller;
-
 void setup()
 {
+    setupOTA();
+
+    Controller controller;
+    Settings settings;
 }
 
 void loop()
 {
+    ArduinoOTA.handle();
 }
