@@ -13,14 +13,21 @@ IO io;
 Screen screen;
 Settings settings;
 
+long lastUpdate = 0;
+
 void setup()
 {
+    pinMode(26, OUTPUT);
+    dacWrite(26, 200);
+
     setupOTA();
 
     controller.setup();
     screen.setup();
     io.setup();
     settings.setup();
+
+    lastUpdate = millis();
 }
 
 void loop()
@@ -30,4 +37,9 @@ void loop()
     io.update();
 
     ArduinoOTA.handle();
+
+    if (millis() - lastUpdate < 50)
+    {
+        delay(50 - (millis() - lastUpdate));
+    }
 }
