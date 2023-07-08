@@ -57,11 +57,15 @@ int currentState = 0;
 long long lastTime = 0;
 
 void setup() {
-  pinMode(26, OUTPUT);
-  dacWrite(26, 255);
   // init sleep mode
-  esp_sleep_enable_ext0_wakeup((gpio_num_t)BUTTON_POWER, 0);
-  pinMode(13, OUTPUT);
+  // esp_sleep_enable_ext0_wakeup((gpio_num_t)BUTTON_POWER, 0);
+
+  display.init();
+  pinMode(26, OUTPUT);
+  digitalWrite(26, HIGH);
+
+  // pinMode(4, OUTPUT);
+  // digitalWrite(4, HIGH);
 
   
 
@@ -105,10 +109,8 @@ void setup() {
   // setup serial ports
   Serial.begin(115200);
   SerialPort.begin(9600, SERIAL_8N1, 16, 17);
-  // IPAddress IP = setupOTA("OSKD");
+  IPAddress IP = setupOTA("OSKD");
 
-  // display.renderIP(IP);
-  delay(1000);
   display.initialRender();
 
   // load settings
@@ -177,7 +179,7 @@ void loop() {
   buttonUp.update();
   buttonDown.update();
   buttonPower.update();
-  // ArduinoOTA.handle();
+  ArduinoOTA.handle();
 }
 
 /*
