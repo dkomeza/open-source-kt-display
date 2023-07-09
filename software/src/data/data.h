@@ -20,8 +20,8 @@ public:
     double batteryVoltage = 0;
     int speed = 0;
     int gear = 0;
-    int temperature = 0;
-    int power = 0;
+    int temperature = -120;
+    int power = 1300;
     int gearState = NORMAL;
 
     byte settingsBuffer[BUFFER_SIZE_UP];

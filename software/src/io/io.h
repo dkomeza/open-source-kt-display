@@ -13,7 +13,10 @@ public:
 
 private:
     const int BATTERY_VOLTAGE_PIN = 35;
+    const int BATTERY_VOLTAGE_OFFSET_PIN = 34;
 
+    int voltageOffset = 0;
+    int getVoltageOffset();
     double getBatteryVoltage();
 };
 

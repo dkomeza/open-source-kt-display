@@ -7,6 +7,14 @@
 
 #include "../data/data.h"
 
+#include "./fonts/Font28.h"
+#include "./fonts/Font96.h"
+#include "./fonts/Font164.h"
+
+#define FONT_MEDIUM Inconsolata28
+#define FONT_LARGE Inconsolata96
+#define FONT_HUGE Inconsolata164
+
 class Screen
 {
 public:
@@ -15,25 +23,27 @@ public:
     void update();
 
 private:
-    TFT_eSPI tft = TFT_eSPI(SCREEN_WIDTH, SCREEN_HEIGHT);
+    TFT_eSPI tft = TFT_eSPI(240, 320);
 
     const int SCREEN_HEIGHT = 320;
     const int SCREEN_WIDTH = 240;
 
-    int batteryBars = 0;
-    double batteryVoltage = 0;
-    int speed = 0;
-    int gear = 0;
-    int temperature = 0;
-    int power = 0;
+    const int BACKLIGHT_PIN = 26;
+
+    int batteryBars = -1;
+    double batteryVoltage = -1;
+    int speed = -1;
+    int gear = -1;
+    int temperature = -30;
+    int power = -1;
     GEAR_STATE gearState = NORMAL;
 
     void drawBatteryBars();
     void drawBatteryVoltage();
     void drawSpeed();
     void drawGear();
-    // void drawTemperature();
-    // void drawPower();
+    void drawTemperature();
+    void drawPower();
 };
 
 extern Screen screen;
