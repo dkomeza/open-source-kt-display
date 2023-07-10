@@ -51,6 +51,8 @@ private:
     int gearState = NORMAL;
     View view = MAIN;
 
+    int cursor = 0;
+
     void main();
     void resetMain();
     void resetSettings();
@@ -62,7 +64,7 @@ private:
     void drawTemperature();
     void drawPower();
 
-    void renderOption(String name, int value, Position position, bool selected);
+    void renderOption(String name, String value, Position position, bool selected);
 };
 
 extern Screen screen;

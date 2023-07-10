@@ -54,7 +54,6 @@ private:
 
     bool checkInitialSettings();
     void loadSettings();
-    void saveSettings();
 
     void calculatePacket();
     byte calculateChecksum(byte *buffer);
@@ -71,6 +70,7 @@ public:
     int menuSize = MENU_SIZE;
     String getOptionName(int index) const { return names[index]; }
     int getOptionValue(int index) const { return values[index]; }
+    int getWheelSize(int value) const { return wheelSizeTable[value][0]; }
 
     int selectedOption = false;
     int cursorPosition = 0;
@@ -83,6 +83,8 @@ public:
     void toggleLegalMode();
     void startWalkMode();
     void stopWalkMode();
+
+    void saveSettings();
 };
 
 extern Settings settings;

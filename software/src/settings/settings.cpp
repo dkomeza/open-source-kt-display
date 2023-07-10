@@ -211,10 +211,10 @@ void Settings::increaseOption()
     }
     else
     {
-        cursorPosition += 1;
-        if (cursorPosition > MENU_SIZE - 1)
+        cursorPosition -= 1;
+        if (cursorPosition < 0)
         {
-            cursorPosition = 0;
+            cursorPosition = MENU_SIZE - 1;
         }
         screen.updateCursor(cursorPosition);
     }
@@ -233,10 +233,10 @@ void Settings::decreaseOption()
     }
     else
     {
-        cursorPosition -= 1;
-        if (cursorPosition < 0)
+        cursorPosition += 1;
+        if (cursorPosition > MENU_SIZE - 1)
         {
-            cursorPosition = MENU_SIZE - 1;
+            cursorPosition = 0;
         }
         screen.updateCursor(cursorPosition);
     }
@@ -245,4 +245,5 @@ void Settings::decreaseOption()
 void Settings::selectOption()
 {
     selectedOption = !selectedOption;
+    screen.updateOption(cursorPosition, values[cursorPosition]);
 }

@@ -3,6 +3,7 @@
 void handleDownClick();
 void handleUpClick();
 void handlePowerDoubleClick();
+void handlePowerClick();
 
 void IO::setup()
 {
@@ -103,6 +104,13 @@ void handleUpClick()
 void handlePowerDoubleClick()
 {
     data.view = data.view == MAIN ? SETTINGS : MAIN;
+
+    switch (data.view)
+    {
+    case MAIN:
+        settings.saveSettings();
+        break;
+    }
 }
 
 void handlePowerClick()

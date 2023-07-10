@@ -273,24 +273,38 @@ void Screen::resetSettings()
     tft.unloadFont();
     tft.drawFastHLine(0, 36, SCREEN_WIDTH, TFT_WHITE);
 
+    settings.cursorPosition = 0;
+
     for (int i = 0; i < settings.menuSize; i++)
     {
-        int x = i < 9 ? 10 : SCREEN_WIDTH / 2 + 10;
-        int y = 40 + i % 9 * 20;
+        int x = i < 9 ? 20 : SCREEN_WIDTH / 2 + 50;
+        int y = 50 + i % 9 * 20;
 
         String name = settings.getOptionName(i);
         int value = settings.getOptionValue(i);
         Position position = {x, y};
         bool selected = settings.cursorPosition == i && settings.selectedOption;
 
-        renderOption(name, value, position, selected);
+        String valueString = String(value);
+
+        if (i == 1)
+        {
+            double size = settings.getWheelSize(value) / 10.0;
+
+            valueString = String(size, 1);
+        }
+
+        renderOption(name, valueString, position, selected);
     }
 
     updateCursor(0);
 }
 
-void Screen::renderOption(String name, int value, Position position, bool selected)
+void Screen::renderOption(String name, String value, Position position, bool selected)
 {
+    String paddingString = "000.0";
+    int padding = tft.textWidth(paddingString);
+
     tft.loadFont(FONT_SMALL);
     tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
     tft.setTextDatum(TL_DATUM);
@@ -299,26 +313,42 @@ void Screen::renderOption(String name, int value, Position position, bool select
     {
         tft.setTextColor(TFT_YELLOW, TFT_BLACK, true);
     }
-    tft.drawString(String(value), position.x + offset, position.y);
+    tft.setTextPadding(padding);
+    tft.drawString(value, position.x + offset, position.y);
+    tft.setTextPadding(0);
     tft.unloadFont();
 }
 
 void Screen::updateOption(int index, int value)
 {
-    int x = index < 9 ? 10 : SCREEN_WIDTH / 2 + 10;
-    int y = 40 + index % 9 * 20;
+    int x = index < 9 ? 20 : SCREEN_WIDTH / 2 + 50;
+    int y = 50 + index % 9 * 20;
 
     String name = settings.getOptionName(index);
     Position position = {x, y};
     bool selected = settings.cursorPosition == index && settings.selectedOption;
 
-    renderOption(name, value, position, selected);
+    String valueString = String(value);
+
+    if (index == 1)
+    {
+        double size = settings.getWheelSize(value) / 10.0;
+
+        valueString = String(size, 1);
+    }
+
+    renderOption(name, valueString, position, selected);
 }
 
 void Screen::updateCursor(int index)
 {
-    int x = index < 9 ? 10 : SCREEN_WIDTH / 2 + 10;
-    int y = 40 + index % 9 * 20;
+    int oldX = cursor < 9 ? 10 : SCREEN_WIDTH / 2 + 40;
+    int oldY = 56 + cursor % 9 * 20;
+    tft.fillTriangle(oldX - 4, oldY - 4, oldX - 4, oldY + 4, oldX + 4, oldY, TFT_BLACK);
 
-    tft.fillRect(x - 2, y - 2, 2, 2, TFT_YELLOW);
+    int x = index < 9 ? 10 : SCREEN_WIDTH / 2 + 40;
+    int y = 56 + index % 9 * 20;
+    tft.fillTriangle(x - 4, y - 4, x - 4, y + 4, x + 4, y, TFT_YELLOW);
+
+    cursor = index;
 }
