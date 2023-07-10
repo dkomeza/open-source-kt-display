@@ -5,6 +5,7 @@
 #include <EEPROM.h>
 
 #include "../data/data.h"
+#include "../screen/screen.h"
 
 class Settings
 {
@@ -67,6 +68,16 @@ public:
     void setup();
 
     byte settingsBuffer[BUFFER_SIZE];
+    int menuSize = MENU_SIZE;
+    String getOptionName(int index) const { return names[index]; }
+    int getOptionValue(int index) const { return values[index]; }
+
+    int selectedOption = false;
+    int cursorPosition = 0;
+
+    void increaseOption();
+    void decreaseOption();
+    void selectOption();
 
     void setGear(int gear);
     void toggleLegalMode();

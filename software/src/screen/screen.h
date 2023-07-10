@@ -8,13 +8,21 @@
 #include "../data/data.h"
 #include "../settings/settings.h"
 
+#include "./fonts/Font18.h"
 #include "./fonts/Font28.h"
 #include "./fonts/Font96.h"
 #include "./fonts/Font164.h"
 
+#define FONT_SMALL Baloo18
 #define FONT_MEDIUM Inconsolata28
 #define FONT_LARGE Inconsolata96
 #define FONT_HUGE Inconsolata164
+
+struct Position
+{
+    int x;
+    int y;
+};
 
 class Screen
 {
@@ -22,6 +30,9 @@ public:
     void setup();
 
     void update();
+
+    void updateOption(int index, int value);
+    void updateCursor(int index);
 
 private:
     TFT_eSPI tft = TFT_eSPI(240, 320);
@@ -51,7 +62,7 @@ private:
     void drawTemperature();
     void drawPower();
 
-    void renderOption(String name, int value, int position);
+    void renderOption(String name, int value, Position position, bool selected);
 };
 
 extern Screen screen;

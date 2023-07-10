@@ -20,6 +20,7 @@ void IO::setup()
                                     { settings.toggleLegalMode(); });
 
     this->buttonPower.onDoubleClick(handlePowerDoubleClick);
+    this->buttonPower.onClick(handlePowerClick);
 }
 
 void IO::update()
@@ -70,23 +71,46 @@ double IO::getBatteryVoltage()
 
 void handleDownClick()
 {
-    data.speed--;
-    if (data.gear > 0)
+    switch (data.view)
     {
-        settings.setGear(data.gear - 1);
+    case MAIN:
+        if (data.gear > 0)
+        {
+            settings.setGear(data.gear - 1);
+        }
+    case SETTINGS:
+        settings.decreaseOption();
+        break;
     }
 }
 
 void handleUpClick()
 {
-    data.speed++;
-    if (data.gear < 5)
+    switch (data.view)
     {
-        settings.setGear(data.gear + 1);
+    case MAIN:
+        if (data.gear < 5)
+        {
+            settings.setGear(data.gear + 1);
+        }
+        break;
+    case SETTINGS:
+        settings.increaseOption();
+        break;
     }
 }
 
 void handlePowerDoubleClick()
 {
     data.view = data.view == MAIN ? SETTINGS : MAIN;
+}
+
+void handlePowerClick()
+{
+    switch (data.view)
+    {
+    case SETTINGS:
+        settings.selectOption();
+        break;
+    }
 }

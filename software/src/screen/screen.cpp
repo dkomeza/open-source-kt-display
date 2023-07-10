@@ -270,11 +270,55 @@ void Screen::resetSettings()
     tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
     tft.setTextDatum(TC_DATUM);
     tft.drawString("settings", SCREEN_WIDTH / 2, 8);
+    tft.unloadFont();
     tft.drawFastHLine(0, 36, SCREEN_WIDTH, TFT_WHITE);
 
-    for (int i = 0; i < settings.MENU_SIZE; i++) {
-        renderOption()
+    for (int i = 0; i < settings.menuSize; i++)
+    {
+        int x = i < 9 ? 10 : SCREEN_WIDTH / 2 + 10;
+        int y = 40 + i % 9 * 20;
+
+        String name = settings.getOptionName(i);
+        int value = settings.getOptionValue(i);
+        Position position = {x, y};
+        bool selected = settings.cursorPosition == i && settings.selectedOption;
+
+        renderOption(name, value, position, selected);
     }
+
+    updateCursor(0);
 }
 
-void Screen::renderOption(String name, int value, int position) {}
+void Screen::renderOption(String name, int value, Position position, bool selected)
+{
+    tft.loadFont(FONT_SMALL);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+    tft.setTextDatum(TL_DATUM);
+    int offset = tft.drawString(name, position.x, position.y) + 6;
+    if (selected)
+    {
+        tft.setTextColor(TFT_YELLOW, TFT_BLACK, true);
+    }
+    tft.drawString(String(value), position.x + offset, position.y);
+    tft.unloadFont();
+}
+
+void Screen::updateOption(int index, int value)
+{
+    int x = index < 9 ? 10 : SCREEN_WIDTH / 2 + 10;
+    int y = 40 + index % 9 * 20;
+
+    String name = settings.getOptionName(index);
+    Position position = {x, y};
+    bool selected = settings.cursorPosition == index && settings.selectedOption;
+
+    renderOption(name, value, position, selected);
+}
+
+void Screen::updateCursor(int index)
+{
+    int x = index < 9 ? 10 : SCREEN_WIDTH / 2 + 10;
+    int y = 40 + index % 9 * 20;
+
+    tft.fillRect(x - 2, y - 2, 2, 2, TFT_YELLOW);
+}

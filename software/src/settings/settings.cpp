@@ -197,3 +197,52 @@ void Settings::stopWalkMode()
 
     this->calculatePacket();
 }
+
+void Settings::increaseOption()
+{
+    if (selectedOption)
+    {
+        values[cursorPosition] += 1;
+        if (values[cursorPosition] > maxValues[cursorPosition])
+        {
+            values[cursorPosition] = minValues[cursorPosition];
+        }
+        screen.updateOption(cursorPosition, values[cursorPosition]);
+    }
+    else
+    {
+        cursorPosition += 1;
+        if (cursorPosition > MENU_SIZE - 1)
+        {
+            cursorPosition = 0;
+        }
+        screen.updateCursor(cursorPosition);
+    }
+}
+
+void Settings::decreaseOption()
+{
+    if (selectedOption)
+    {
+        values[cursorPosition] -= 1;
+        if (values[cursorPosition] < minValues[cursorPosition])
+        {
+            values[cursorPosition] = maxValues[cursorPosition];
+        }
+        screen.updateOption(cursorPosition, values[cursorPosition]);
+    }
+    else
+    {
+        cursorPosition -= 1;
+        if (cursorPosition < 0)
+        {
+            cursorPosition = MENU_SIZE - 1;
+        }
+        screen.updateCursor(cursorPosition);
+    }
+}
+
+void Settings::selectOption()
+{
+    selectedOption = !selectedOption;
+}
