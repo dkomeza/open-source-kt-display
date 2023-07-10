@@ -63,7 +63,7 @@ void Controller::parseData(byte buffer[])
     }
     else
     {
-        data.gearState ^= BRAKE;
+        data.gearState &= ~BRAKE;
     }
 }
 

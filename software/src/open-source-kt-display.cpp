@@ -35,23 +35,6 @@ void loop()
     screen.update();
     io.update();
 
-    if (rising)
-    {
-        if (data.power >= 1500)
-        {
-            rising = false;
-        }
-        data.power += 13;
-    }
-    else
-    {
-        if (data.power <= 13)
-        {
-            rising = true;
-        }
-        data.power -= 13;
-    }
-
     ArduinoOTA.handle();
 
     if (millis() - lastUpdate < 50)

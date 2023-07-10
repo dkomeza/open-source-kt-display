@@ -1,14 +1,34 @@
 #include "./io.h"
 
+void handleDownClick();
+void handleUpClick();
+void handlePowerDoubleClick();
+
 void IO::setup()
 {
-    pinMode(BATTERY_VOLTAGE_PIN, INPUT);
+    pinMode(this->BATTERY_VOLTAGE_PIN, INPUT);
     this->voltageOffset = this->getVoltageOffset();
+
+    this->buttonDown.onClick(handleDownClick);
+    this->buttonDown.onLongPressStart([]()
+                                      { settings.startWalkMode(); });
+    this->buttonDown.onLongPressStop([]()
+                                     { settings.stopWalkMode(); });
+
+    this->buttonUp.onClick(handleUpClick);
+    this->buttonUp.onLongPressStart([]()
+                                    { settings.toggleLegalMode(); });
+
+    this->buttonPower.onDoubleClick(handlePowerDoubleClick);
 }
 
 void IO::update()
 {
     data.batteryVoltage = this->getBatteryVoltage();
+
+    this->buttonDown.update();
+    this->buttonPower.update();
+    this->buttonUp.update();
 }
 
 int IO::getVoltageOffset()
@@ -46,4 +66,27 @@ double IO::getBatteryVoltage()
     double batteryVoltage = voltage * (1000 + 56) / 56;
 
     return batteryVoltage / 1000;
+}
+
+void handleDownClick()
+{
+    data.speed--;
+    if (data.gear > 0)
+    {
+        settings.setGear(data.gear - 1);
+    }
+}
+
+void handleUpClick()
+{
+    data.speed++;
+    if (data.gear < 5)
+    {
+        settings.setGear(data.gear + 1);
+    }
+}
+
+void handlePowerDoubleClick()
+{
+    data.view = data.view == MAIN ? SETTINGS : MAIN;
 }

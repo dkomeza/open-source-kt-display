@@ -13,6 +13,9 @@ private:
     static const int BUFFER_SIZE = 13;
     static const int EEPROM_SIZE = 512;
 
+    static const int GEAR_EEPROM_ADDRESS = 20;
+    static const int LEGAL_MODE_EEPROM_ADDRESS = 21;
+
     static const int MAX_GEAR = 5;
     static const int MIN_GEAR = 0;
     static const int MAX_SPEED_LIMIT = 72;
@@ -42,6 +45,11 @@ private:
     int *C14 = &values[14];
 
     int currentGear = 0;
+    int previousGear = 0;
+
+    bool legalMode = false;
+
+    int speedLimit = *SPEED_LIMIT;
 
     bool checkInitialSettings();
     void loadSettings();
@@ -50,13 +58,20 @@ private:
     void calculatePacket();
     byte calculateChecksum(byte *buffer);
 
+    void loadGearFromEEPROM();
+    void saveGearToEEPROM();
+    void loadLegalModeFromEEPROM();
+    void saveLegalModeToEEPROM();
+
 public:
     void setup();
 
     byte settingsBuffer[BUFFER_SIZE];
 
     void setGear(int gear);
-    void setSpeedLimit(int speedLimit);
+    void toggleLegalMode();
+    void startWalkMode();
+    void stopWalkMode();
 };
 
 extern Settings settings;

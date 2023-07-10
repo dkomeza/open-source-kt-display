@@ -5,6 +5,8 @@ void Settings::setup()
     EEPROM.begin(EEPROM_SIZE);
 
     loadSettings();
+    loadGearFromEEPROM();
+    loadLegalModeFromEEPROM();
 }
 
 void Settings::loadSettings()
@@ -53,11 +55,11 @@ void Settings::calculatePacket()
     settingsBuffer[0] = *P5;
     settingsBuffer[1] = currentGear;
     settingsBuffer[2] =
-        (((*SPEED_LIMIT - 10) & 31) << 3) | (wheelSizeTable[*WHEEL_SIZE][1] >> 2);
+        (((speedLimit - 10) & 31) << 3) | (wheelSizeTable[*WHEEL_SIZE][1] >> 2);
     settingsBuffer[3] = *P1;
     settingsBuffer[4] =
         ((wheelSizeTable[*WHEEL_SIZE][1] & 3) << 6) |
-        ((*SPEED_LIMIT - 10) & 32) |
+        ((speedLimit - 10) & 32) |
         *P4 << 4 | *P3 << 3 | *P2;
     settingsBuffer[5] = 0;
     settingsBuffer[6] = (*C1 << 3) | *C2;
@@ -92,6 +94,7 @@ byte Settings::calculateChecksum(byte *buffer)
 
 void Settings::setGear(int gear)
 {
+    previousGear = currentGear;
     if (gear > MAX_GEAR)
     {
         gear = MAX_GEAR;
@@ -101,23 +104,96 @@ void Settings::setGear(int gear)
         gear = MIN_GEAR;
     }
 
+    if (legalMode && gear > 2)
+    {
+        gear = 2;
+    }
+
     currentGear = gear;
+    data.gear = gear;
+
+    this->calculatePacket();
+    this->saveGearToEEPROM();
+}
+
+void Settings::toggleLegalMode()
+{
+    legalMode = !legalMode;
+
+    if (legalMode)
+    {
+        data.gearState |= LIMIT;
+        speedLimit = 25;
+        if (currentGear > 2)
+        {
+            currentGear = 2;
+            data.gear = currentGear;
+        }
+    }
+    else
+    {
+        data.gearState ^= LIMIT;
+        speedLimit = *SPEED_LIMIT;
+    }
+
+    this->calculatePacket();
+    this->saveLegalModeToEEPROM();
+    this->saveGearToEEPROM();
+}
+
+void Settings::saveGearToEEPROM()
+{
+    EEPROM.write(GEAR_EEPROM_ADDRESS, currentGear);
+    EEPROM.commit();
+}
+
+void Settings::loadGearFromEEPROM()
+{
+    currentGear = EEPROM.read(GEAR_EEPROM_ADDRESS);
+    data.gear = currentGear;
+    this->calculatePacket();
+}
+
+void Settings::saveLegalModeToEEPROM()
+{
+    EEPROM.write(LEGAL_MODE_EEPROM_ADDRESS, legalMode);
+    EEPROM.commit();
+}
+
+void Settings::loadLegalModeFromEEPROM()
+{
+    legalMode = EEPROM.read(LEGAL_MODE_EEPROM_ADDRESS);
+    speedLimit = legalMode ? 25 : *SPEED_LIMIT;
+
+    if (legalMode)
+    {
+        data.gearState |= LIMIT;
+        if (currentGear > 2)
+        {
+            currentGear = 2;
+            data.gear = 2;
+        }
+    }
+    else
+    {
+        data.gearState = NORMAL;
+    }
 
     this->calculatePacket();
 }
 
-void Settings::setSpeedLimit(int speedLimit)
+void Settings::startWalkMode()
 {
-    if (speedLimit > MAX_SPEED_LIMIT)
-    {
-        speedLimit = MAX_SPEED_LIMIT;
-    }
-    else if (speedLimit < MIN_SPEED_LIMIT)
-    {
-        speedLimit = MIN_SPEED_LIMIT;
-    }
+    previousGear = currentGear;
+    currentGear = 6;
+    data.gear = currentGear;
+    this->calculatePacket();
+}
 
-    *SPEED_LIMIT = speedLimit;
+void Settings::stopWalkMode()
+{
+    currentGear = previousGear;
+    data.gear = previousGear;
 
     this->calculatePacket();
 }

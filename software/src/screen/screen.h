@@ -6,6 +6,7 @@
 #include <TFT_eSPI.h>
 
 #include "../data/data.h"
+#include "../settings/settings.h"
 
 #include "./fonts/Font28.h"
 #include "./fonts/Font96.h"
@@ -34,9 +35,14 @@ private:
     double batteryVoltage = -1;
     int speed = -1;
     int gear = -1;
-    int temperature = -30;
+    int temperature = -1;
     int power = -1;
-    GEAR_STATE gearState = NORMAL;
+    int gearState = NORMAL;
+    View view = MAIN;
+
+    void main();
+    void resetMain();
+    void resetSettings();
 
     void drawBatteryBars();
     void drawBatteryVoltage();
@@ -44,6 +50,8 @@ private:
     void drawGear();
     void drawTemperature();
     void drawPower();
+
+    void renderOption(String name, int value, int position);
 };
 
 extern Screen screen;

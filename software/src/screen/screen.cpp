@@ -21,35 +21,71 @@ void Screen::setup()
 
 void Screen::update()
 {
+    if (data.view != view)
+    {
+        view = data.view;
+        switch (view)
+        {
+        case MAIN:
+            resetMain();
+            break;
+        case SETTINGS:
+            resetSettings();
+            break;
+        }
+    }
+
+    if (data.view == MAIN)
+    {
+        main();
+    }
+}
+
+void Screen::resetMain()
+{
+    tft.fillScreen(TFT_BLACK);
+
+    tft.drawRoundRect(10, 6, 80, 24, 4, TFT_GREEN);
+    tft.fillRect(90, 13, 3, 10, TFT_GREEN);
+    tft.fillRoundRect(92, 13, 3, 10, 2, TFT_GREEN);
+
+    tft.drawFastHLine(0, 52, 240, TFT_WHITE);
+    tft.drawFastHLine(0, 284, 240, TFT_WHITE);
+
+    drawBatteryBars();
+    drawBatteryVoltage();
+    drawSpeed();
+    drawGear();
+    drawTemperature();
+    drawPower();
+}
+
+void Screen::main()
+{
     if (data.batteryBars != batteryBars)
     {
         batteryBars = data.batteryBars;
         drawBatteryBars();
     }
 
-    tft.loadFont(FONT_MEDIUM);
     if (data.batteryVoltage != batteryVoltage)
     {
         batteryVoltage = data.batteryVoltage;
         drawBatteryVoltage();
     }
-    tft.unloadFont();
 
-    tft.loadFont(FONT_HUGE);
     if (data.speed != speed)
     {
         speed = data.speed;
         drawSpeed();
     }
-    tft.unloadFont();
 
-    tft.loadFont(FONT_LARGE);
-    if (data.gear != gear || data.gearState != gearState)
+    if (data.gearState != gearState || data.gear != gear)
     {
         gear = data.gear;
+        gearState = data.gearState;
         drawGear();
     }
-    tft.unloadFont();
 
     if (data.temperature != temperature)
     {
@@ -87,6 +123,8 @@ void Screen::drawBatteryBars()
 
 void Screen::drawBatteryVoltage()
 {
+    tft.loadFont(FONT_MEDIUM);
+
     String voltage = String(batteryVoltage, 1) + "V";
 
     if (batteryVoltage < 9.95)
@@ -97,10 +135,13 @@ void Screen::drawBatteryVoltage()
     tft.setTextColor(TFT_GREEN, TFT_BLACK, true);
     tft.setTextDatum(TL_DATUM);
     tft.drawString(voltage, 158, 8);
+    tft.unloadFont();
 }
 
 void Screen::drawSpeed()
 {
+    tft.loadFont(FONT_HUGE);
+
     if (speed >= 100)
     {
         speed = 99;
@@ -118,20 +159,25 @@ void Screen::drawSpeed()
         speedString = "0" + speedString;
     }
 
+    int padding = tft.textWidth("00");
+    tft.setTextPadding(padding);
     tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-    tft.setTextDatum(MC_DATUM);
-    tft.drawString(speedString, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 24);
+    tft.setTextDatum(ML_DATUM);
+    tft.drawString(speedString, SCREEN_WIDTH / 2 - padding / 2, SCREEN_HEIGHT / 2 - 24);
+    tft.unloadFont();
 }
 
 void Screen::drawGear()
 {
+    tft.loadFont(FONT_LARGE);
+
     if (gear < 0)
     {
         gear = 0;
     }
-    if (gear > 5)
+    if (gear > 6)
     {
-        gear = 5;
+        gear = 6;
     }
 
     if (gearState & BRAKE)
@@ -147,8 +193,11 @@ void Screen::drawGear()
         tft.setTextColor(TFT_YELLOW, TFT_BLACK, true);
     }
 
-    tft.setTextDatum(TC_DATUM);
-    tft.drawString(String(data.gear), SCREEN_WIDTH / 2, 204);
+    int padding = tft.textWidth("0");
+    tft.setTextPadding(padding);
+    tft.setTextDatum(TL_DATUM);
+    tft.drawString(String(gear), SCREEN_WIDTH / 2 - padding / 2, 204);
+    tft.unloadFont();
 }
 
 void Screen::drawTemperature()
@@ -164,29 +213,6 @@ void Screen::drawTemperature()
     tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
     int offset = tft.drawString(labelString, x, y);
     x += offset;
-
-    tft.setTextColor(TFT_BLACK, TFT_BLACK, true);
-
-    if (temperature > -100 && temperature <= -10)
-    {
-        x += tft.drawString("0", x, y);
-    }
-    else if (temperature > -10 && temperature < 0)
-    {
-        x += tft.drawString("00", x, y);
-    }
-    else if (temperature >= 0 && temperature < 10)
-    {
-        x += tft.drawString("000", x, y);
-    }
-    else if (temperature >= 10 && temperature < 100)
-    {
-        x += tft.drawString("00", x, y);
-    }
-    else if (temperature >= 100 && temperature < 1000)
-    {
-        x += tft.drawString("0", x, y);
-    }
 
     if (temperature < 0)
     {
@@ -208,7 +234,10 @@ void Screen::drawTemperature()
     {
         tft.setTextColor(TFT_RED, TFT_BLACK, true);
     }
-    tft.drawString(temperatureString, x, y);
+
+    int padding = tft.textWidth("-000°C");
+    tft.setTextDatum(TL_DATUM);
+    tft.drawString(temperatureString, x + 6, y);
     tft.unloadFont();
 }
 
@@ -226,21 +255,26 @@ void Screen::drawPower()
     int offset = tft.drawString(labelString, x, y);
     x += offset;
 
-    tft.setTextColor(TFT_BLACK, TFT_BLACK, true);
-    if (power < 10)
-    {
-        x += tft.drawString("000", x, y);
-    }
-    else if (power < 100)
-    {
-        x += tft.drawString("00", x, y);
-    }
-    else if (power < 1000)
-    {
-        x += tft.drawString("0", x, y);
-    }
-
+    int padding = tft.textWidth("0000W");
+    tft.setTextDatum(TL_DATUM);
+    tft.setTextPadding(padding);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK, true);
-    tft.drawString(powerString, x, y);
+    tft.drawString(powerString, x + 6, y);
     tft.unloadFont();
 }
+
+void Screen::resetSettings()
+{
+    tft.fillScreen(TFT_BLACK);
+    tft.loadFont(FONT_MEDIUM);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+    tft.setTextDatum(TC_DATUM);
+    tft.drawString("settings", SCREEN_WIDTH / 2, 8);
+    tft.drawFastHLine(0, 36, SCREEN_WIDTH, TFT_WHITE);
+
+    for (int i = 0; i < settings.MENU_SIZE; i++) {
+        renderOption()
+    }
+}
+
+void Screen::renderOption(String name, int value, int position) {}

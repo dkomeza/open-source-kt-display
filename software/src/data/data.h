@@ -10,6 +10,12 @@ enum GEAR_STATE
     BRAKE = 4,
 };
 
+enum View
+{
+    MAIN,
+    SETTINGS,
+};
+
 class Data
 {
 private:
@@ -23,6 +29,7 @@ public:
     int temperature = -120;
     int power = 1300;
     int gearState = NORMAL;
+    View view = MAIN;
 
     byte settingsBuffer[BUFFER_SIZE_UP];
 };
