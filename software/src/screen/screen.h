@@ -34,6 +34,10 @@ public:
     void updateOption(int index, int value);
     void updateCursor(int index);
 
+    void setBrightness(int brightness);
+
+    void printPacket(byte buffer[], int size);
+
 private:
     TFT_eSPI tft = TFT_eSPI(240, 320);
 

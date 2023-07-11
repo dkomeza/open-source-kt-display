@@ -14,9 +14,7 @@ void Screen::setup()
     tft.drawFastHLine(0, 52, 240, TFT_WHITE);
     tft.drawFastHLine(0, 284, 240, TFT_WHITE);
 
-    delay(50);
     pinMode(BACKLIGHT_PIN, OUTPUT);
-    dacWrite(BACKLIGHT_PIN, 255);
 }
 
 void Screen::update()
@@ -39,6 +37,11 @@ void Screen::update()
     {
         main();
     }
+}
+
+void Screen::setBrightness(int brightness)
+{
+    digitalWrite(BACKLIGHT_PIN, brightness);
 }
 
 void Screen::resetMain()
@@ -351,4 +354,38 @@ void Screen::updateCursor(int index)
     tft.fillTriangle(x - 4, y - 4, x - 4, y + 4, x + 4, y, TFT_YELLOW);
 
     cursor = index;
+}
+
+void Screen::printPacket(byte buff[], int size)
+{
+    tft.loadFont(FONT_SMALL);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+    tft.setTextDatum(TL_DATUM);
+    tft.setTextPadding(0);
+
+    int x = 0;
+    int y = 0;
+
+    for (int i = 0; i < size; i++)
+    {
+        String hex = String(buff[i], DEC);
+        if (hex.length() == 1)
+        {
+            hex = "0" + hex;
+        }
+
+        hex = hex + ",";
+
+        tft.drawString(hex, x, y);
+
+        x += tft.textWidth(hex) + 6;
+
+        if (x > SCREEN_WIDTH - 20)
+        {
+            x = 0;
+            y += 20;
+        }
+    }
+
+    tft.unloadFont();
 }

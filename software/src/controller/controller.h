@@ -5,6 +5,7 @@
 #include <HardwareSerial.h>
 
 #include "../data/data.h"
+#include "../screen/screen.h"
 
 class Controller
 {

@@ -1,9 +1,11 @@
 #include "./io.h"
+#include <esp_sleep.h>
 
 void handleDownClick();
 void handleUpClick();
 void handlePowerDoubleClick();
 void handlePowerClick();
+void handlePowerLongPress();
 
 void IO::setup()
 {
@@ -22,6 +24,7 @@ void IO::setup()
 
     this->buttonPower.onDoubleClick(handlePowerDoubleClick);
     this->buttonPower.onClick(handlePowerClick);
+    this->buttonPower.onLongPressStart(handlePowerLongPress);
 }
 
 void IO::update()
@@ -79,6 +82,7 @@ void handleDownClick()
         {
             settings.setGear(data.gear - 1);
         }
+        break;
     case SETTINGS:
         settings.decreaseOption();
         break;
@@ -120,5 +124,21 @@ void handlePowerClick()
     case SETTINGS:
         settings.selectOption();
         break;
+    }
+}
+
+void handlePowerLongPress()
+{
+    switch (data.view)
+    {
+    case MAIN:
+        digitalWrite(26, LOW);
+        digitalWrite(19, LOW);
+        delay(100);
+
+        gpio_hold_en(GPIO_NUM_26);
+        gpio_hold_en(GPIO_NUM_19);
+
+        esp_deep_sleep_start();
     }
 }

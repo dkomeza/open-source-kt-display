@@ -75,17 +75,16 @@ void Settings::calculatePacket()
     memcpy(data.settingsBuffer, settingsBuffer, sizeof(settingsBuffer));
 }
 
-byte Settings::calculateChecksum(byte *buffer)
+byte Settings::calculateChecksum(byte buffer[])
 {
     byte checksum = 0;
 
     for (int i = 0; i < BUFFER_SIZE; i++)
     {
-        if (i == 5)
+        if (i != 5)
         {
-            continue;
+            checksum ^= buffer[i];
         }
-        checksum ^= buffer[i];
     }
 
     checksum ^= 3;

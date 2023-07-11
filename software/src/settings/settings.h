@@ -56,7 +56,7 @@ private:
     void loadSettings();
 
     void calculatePacket();
-    byte calculateChecksum(byte *buffer);
+    byte calculateChecksum(byte buffer[]);
 
     void loadGearFromEEPROM();
     void saveGearToEEPROM();

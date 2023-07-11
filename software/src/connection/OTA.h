@@ -16,7 +16,7 @@ IPAddress setupOTA()
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
 
-    WiFi.waitForConnectResult(5000);
+    WiFi.waitForConnectResult(2000);
 
     ArduinoOTA.begin();
 

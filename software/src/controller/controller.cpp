@@ -19,11 +19,26 @@ void Controller::sendData()
 void Controller::receiveData()
 {
     byte buffer[BUFFER_SIZE];
+
+    byte firstByte = controllerSerial.peek();
+    int counter = 0;
+
+    while (firstByte != 65 && counter < 20)
+    {
+        controllerSerial.read();
+        firstByte = controllerSerial.peek();
+        counter++;
+    }
+
+    if (counter >= 20)
+    {
+        return;
+    }
+
     if (controllerSerial.available() >= BUFFER_SIZE)
     {
         controllerSerial.readBytes(buffer, BUFFER_SIZE);
     }
-
     parseData(buffer);
 }
 
@@ -31,7 +46,7 @@ void Controller::parseData(byte buffer[])
 {
     bool isValid = isDataValid(buffer, 0);
 
-    if (isValid)
+    if (!isValid)
     {
         return;
     }
@@ -43,6 +58,11 @@ void Controller::parseData(byte buffer[])
     else
     {
         data.speed = round(60000 / (buffer[3] << 8 | buffer[4]) * RPM_CONSTANT * 0.66);
+    }
+
+    if (data.speed < 2)
+    {
+        data.speed = 0;
     }
 
     data.batteryBars = buffer[1];
