@@ -68,7 +68,7 @@ double IO::getBatteryVoltage()
 
     double voltage = map(average, 0, 4095, 0, 3300);
 
-    double batteryVoltage = voltage * (1000 + 56) / 56;
+    double batteryVoltage = voltage * (1000 + 33) / 33;
 
     return batteryVoltage / 1000;
 }
