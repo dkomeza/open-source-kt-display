@@ -1,5 +1,10 @@
 #include "buttons.h"
 
+// Constants
+const int BUTTON_POWER_PIN = 27;
+const int BUTTON_UP_PIN = 12;
+const int BUTTON_DOWN_PIN = 14;
+
 using namespace Buttons;
 
 Button *buttons[] = {};
