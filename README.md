@@ -6,6 +6,8 @@
 # Open-Source KT Display
 Open source display firmware for E-Bike KT controllers. Made for Arduino with compatible SPI Display. 
 
+**NOTE**: _This repository is no longer supported or updated by @dkomeza. It has been moved to [oskd](https://github.com/dkomeza/oskd) where it will be maintained from now on (21.01.2024). If you wish to continue to develop this code yourself, I recommend you fork it._</code>
+
 <br>
 
 ## TL;DR
